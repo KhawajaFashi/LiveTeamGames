@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cluetivity Dashboard",
-  description: "Cluetivity Dashboard - Your gaming hub",
+  title: "LiveTeamGames",
+  description: "LiveTeamGames Dashboard - Your gaming hub",
 };
 
 export default function RootLayout({
