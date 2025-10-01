@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -227,9 +227,11 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ isSidebarOpen =
                     expandedItem={expandedItem}
                     setExpandedItem={setExpandedItem}
                 >
-                    <SubNavItem label="Magic Portal" href="/games?name=magic-portal" />
-                    <SubNavItem label="Operation Mindfall" href="/games?name=operation-mindfall" />
-                    <SubNavItem label="Blackout" href="/games?name=blackout" />
+                    <Suspense fallback={<div>Loading...</div>}>
+                        <SubNavItem label="Magic Portal" href="/games?name=magic-portal" />
+                        <SubNavItem label="Operation Mindfall" href="/games?name=operation-mindfall" />
+                        <SubNavItem label="Blackout" href="/games?name=blackout" />
+                    </Suspense>
                 </NavItem>
 
                 <NavItem
@@ -250,9 +252,11 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ isSidebarOpen =
                     expandedItem={expandedItem}
                     setExpandedItem={setExpandedItem}
                 >
-                    <SubNavItem label="Magic Portal" href="/games?name=magic-portal" />
-                    <SubNavItem label="Operation Mindfall" href="/games?name=operation-mindfall" />
-                    <SubNavItem label="Blackout" href="/games?name=blackout" />
+                    <Suspense fallback={<div>Loading...</div>}>
+                        <SubNavItem label="Magic Portal" href="/games?name=magic-portal" />
+                        <SubNavItem label="Operation Mindfall" href="/games?name=operation-mindfall" />
+                        <SubNavItem label="Blackout" href="/games?name=blackout" />
+                    </Suspense>
                 </NavItem>
 
                 <NavItem
@@ -282,9 +286,11 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ isSidebarOpen =
                     expandedItem={expandedItem}
                     setExpandedItem={setExpandedItem}
                 >
-                    <SubNavItem label="Magic Portal" href="/games?name=magic-portal" />
-                    <SubNavItem label="Operation Mindfall" href="/games?name=operation-mindfall" />
-                    <SubNavItem label="Blackout" href="/games?name=blackout" />
+                    <Suspense fallback={<div>Loading...</div>}>
+                        <SubNavItem label="Magic Portal" href="/games?name=magic-portal" />
+                        <SubNavItem label="Operation Mindfall" href="/games?name=operation-mindfall" />
+                        <SubNavItem label="Blackout" href="/games?name=blackout" />
+                    </Suspense>
                 </NavItem>
 
                 <NavItem
