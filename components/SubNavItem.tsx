@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 export interface SubNavItemProps {
