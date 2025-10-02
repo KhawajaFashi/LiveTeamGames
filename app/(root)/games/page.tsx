@@ -20,10 +20,8 @@ export default async function GamesPage({ searchParams }: GamesPageProps) {
     }
 
     return (
-        <div className="h-full w-full bg-[#f2f3f8] p-6">
-
-            {/* Game Content */}
-            <div className='bg-white rounded-lg shadow-sm mb-6 p-5'>
+        <div className="h-screen bg-white shadow-lg m-5">
+            <div className='border-b border-gray-200 p-4'>
                 <h1 className="text-3xl font-bold text-gray-800">{gameData.title}</h1>
             </div>
 

@@ -36,27 +36,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
 
     return (
-        <html lang="en">
-            <body>
-                <main className="flex min-h-screen w-full gap-0">
+        <main className="flex min-h-screen w-full gap-0">
 
-                    <aside ref={sidebarRef} className={`${!isSidebarOpen ? 'max-xl:hidden' : 'max-xl:fixed z-10'}`}>
-                        <CollapsibleSidebar isSidebarOpen={isSidebarOpen} />
-                    </aside>
+            <aside ref={sidebarRef} className={`${!isSidebarOpen ? 'max-xl:hidden' : 'max-xl:fixed z-10'}`}>
+                <CollapsibleSidebar isSidebarOpen={isSidebarOpen} />
+            </aside>
 
-                    <section className="flex flex-col justify-between w-full">
-                        <div className="w-full">
-                            <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(v => !v)} />
-                            <div className="w-full">{children}</div>
-                        </div>
-                        <div>
-                            <SupportButton />
-                            <Footer />
-                        </div>
-                    </section>
-                </main>
-            </body>
-        </html>
+            <section className="flex flex-col justify-between w-full">
+                <div className="w-full">
+                    <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(v => !v)} />
+                    <div className="w-full">{children}</div>
+                </div>
+                <div>
+                    <SupportButton />
+                    <Footer />
+                </div>
+            </section>
+        </main>
     );
 };
 

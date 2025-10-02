@@ -104,8 +104,8 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive = false, hasChe
     const content = (
         <div
             className={`flex items-center justify-between px-6 py-2 rounded-lg cursor-pointer transition-colors ${isActive
-                ? 'text-[#00adee]'
-                : 'text-white hover:text-[#716aca]'
+                ? 'text-[var(--color-primary)]'
+                : 'text-white hover:text-[var(--color-secondary)]'
                 } ${!isCollapsed ? 'hover:bg-[rgba(128,128,128,0.3)]' : ''}`}
             onClick={handleClick}
         >
@@ -121,12 +121,11 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive = false, hasChe
         </div>
     );
 
-    // console.log("Expanded Item:", pathname, "Label:", label);
 
     return (
         <div>
             {href ? (
-                <Link href={href}>
+                <Link href={href} target={`${href === "https://cluetivity.zendesk.com/hc/en-us" ? '_blank' : ''}`}>
                     {content}
                 </Link>
             ) : (
@@ -161,7 +160,7 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ isSidebarOpen =
     const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
     return (
-        <div className={`bg-[#000f24] h-full flex flex-col transition-all duration-300 ${isCollapsed ? 'w-16' : ''
+        <div className={`bg-[var(--color-background-dark)] h-full flex flex-col transition-[var(--transition-normal)] ${isCollapsed ? 'w-16' : ''
             } ${!isSidebarOpen ? 'max-xl:hidden' : 'max-xl:fixed max-xl:z-10'}`}>
             {/* Logo Section */}
             <div className="xl:flex items-center justify-between px-4 py-2 hidden">
@@ -253,9 +252,9 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ isSidebarOpen =
                     setExpandedItem={setExpandedItem}
                 >
                     <Suspense fallback={<div>Loading...</div>}>
-                        <SubNavItem label="Magic Portal" href="/games?name=magic-portal" />
-                        <SubNavItem label="Operation Mindfall" href="/games?name=operation-mindfall" />
-                        <SubNavItem label="Blackout" href="/games?name=blackout" />
+                        <SubNavItem label="Magic Portal" href="/operator?name=magic-portal" />
+                        <SubNavItem label="Operation Mindfall" href="/operator?name=operation-mindfall" />
+                        <SubNavItem label="Blackout" href="/operator?name=blackout" />
                     </Suspense>
                 </NavItem>
 
@@ -287,18 +286,25 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ isSidebarOpen =
                     setExpandedItem={setExpandedItem}
                 >
                     <Suspense fallback={<div>Loading...</div>}>
-                        <SubNavItem label="Magic Portal" href="/games?name=magic-portal" />
-                        <SubNavItem label="Operation Mindfall" href="/games?name=operation-mindfall" />
-                        <SubNavItem label="Blackout" href="/games?name=blackout" />
+                        <SubNavItem label="Magic Portal" href="/highscores?name=magic-portal" />
+                        <SubNavItem label="Operation Mindfall" href="/highscores?name=operation-mindfall" />
+                        <SubNavItem label="Blackout" href="/highscores?name=blackout" />
                     </Suspense>
                 </NavItem>
 
                 <NavItem
                     icon={
-                        <Image src="/stats.png" alt='stats' width={1000} height={1000} className='w-5 h-5' />
+                        <Image src="/stats.png" alt='stats' width={1000} height={1000} className='w-5 h-5'
+                            style={{
+                                filter: 'hue-rotate(90deg) sepia(50%) brightness(120%)'
+                            }}
+                        />
                     }
                     label="Statistics"
+                    href="/statistics"
+                    isActive={pathname === '/statistics'}
                     isCollapsed={isCollapsed}
+                    pathname={pathname || ''}
                 />
 
                 <NavItem
@@ -314,6 +320,7 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ isSidebarOpen =
                         </i>
                     }
                     label="Help"
+                    href="https://cluetivity.zendesk.com/hc/en-us"
                     isCollapsed={isCollapsed}
                 />
             </nav>

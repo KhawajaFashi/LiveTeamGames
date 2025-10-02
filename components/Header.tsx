@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { IoIosPerson } from "react-icons/io";
 import ProfilePopup from './ProfilePopup';
 import Image from 'next/image';
@@ -11,23 +11,34 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onToggleSidebar }) => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const profileButtonRef = useRef<HTMLDivElement | null>(null);
 
     const toggleProfile = () => {
         console.log("Clicked on the button", isProfileOpen);
         setIsProfileOpen((prev) => !prev);
-        
+
     };
-    useEffect(() => { 
+    useEffect(() => {
         console.log("Clicked on the button after", !isProfileOpen);
     }, [isProfileOpen]);
 
     return (
         <header className="xl:bg-white h-16 flex items-center max-[512px]:w-screen justify-between xl:justify-end bg-[#000f24] px-6 ">
-            <div className="hidden items-center justify-end xl:flex space-x-4 cursor-pointer" onClick={toggleProfile}>
-                <IoIosPerson color='#00adee' size='30px' />
+            <div
+                ref={profileButtonRef}
+                className="cursor-pointer"
+                onClick={toggleProfile}
+            >
+                <div className='hidden xl:flex items-center space-x-4'>
+                    <IoIosPerson color="#00adee" size="30px" />
+                </div>
             </div>
-            <ProfilePopup isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
 
+            <ProfilePopup
+                isOpen={isProfileOpen}
+                onClose={() => setIsProfileOpen(false)}
+                buttonRef={profileButtonRef}
+            />
             <Image
                 src="/clutivity_logo.png"
                 alt="Logo"
