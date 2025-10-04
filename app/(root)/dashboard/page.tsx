@@ -1,6 +1,6 @@
 import React from 'react';
-import BlackoutCard from '../../../components/BlackoutCard';
-import NewsFeedCard from '../../../components/NewsFeedCard';
+import BlackoutCard from '../../../components/Dashboard/BlackoutCard';
+import NewsFeedCard from '../../../components/Dashboard/NewsFeedCard';
 
 export default function Dashboard() {
     return (

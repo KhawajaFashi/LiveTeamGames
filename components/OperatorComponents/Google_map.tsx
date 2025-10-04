@@ -1,4 +1,5 @@
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useRef } from 'react';
 
 interface Team {
@@ -21,8 +22,9 @@ const Map: React.FC<MapProps> = ({ teams, selectedTeamNo }) => {
     const markersRef = useRef<any[]>([]);
 
     const initMap = () => {
-        if (!mapRef.current || !(window as any).google) return;
-        mapInstance.current = new (window as any).google.maps.Map(mapRef.current, {
+        const globalAny = window as any;
+        if (!mapRef.current || !globalAny.google) return;
+        mapInstance.current = new globalAny.google.maps.Map(mapRef.current, {
             center: { lat: 51.1657, lng: 10.4515 }, // Center of Germany
             zoom: 6,
         });
@@ -30,17 +32,17 @@ const Map: React.FC<MapProps> = ({ teams, selectedTeamNo }) => {
 
     // export default Map;
     const updateMarkers = () => {
-        if (!mapInstance.current || !(window as any).google) return;
+        const globalAny = window as any;
+        if (!mapInstance.current || !globalAny.google) return;
         // Remove old markers
         markersRef.current.forEach(marker => marker.setMap(null));
         markersRef.current = [];
         // Add new markers
         teams.forEach(team => {
-            const marker = new (window as any).google.maps.Marker({
+            const marker = new globalAny.google.maps.Marker({
                 position: { lat: team.lat, lng: team.lng },
                 map: mapInstance.current,
                 label: team.teamName,
-                icon: selectedTeamNo === team.no ? undefined : undefined,
             });
             markersRef.current.push(marker);
         });
@@ -64,7 +66,6 @@ const Map: React.FC<MapProps> = ({ teams, selectedTeamNo }) => {
         } else {
             initMap();
         }
-        // eslint-disable-next-line
     }, []);
 
     useEffect(() => {

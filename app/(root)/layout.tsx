@@ -1,8 +1,8 @@
 "use client";
-import CollapsibleSidebar from '@/components/CollapsibleSidebar';
-import Footer from '@/components/Footer';
-import Header from '@/components/Header';
-import SupportButton from '@/components/SupportButton';
+import CollapsibleSidebar from '@/components/LayoutComponents/CollapsibleSidebar';
+import Footer from '@/components/LayoutComponents/Footer';
+import Header from '@/components/LayoutComponents/Header';
+import SupportButton from '@/components/LayoutComponents/SupportButton';
 import React, { useEffect, useRef, useState } from 'react';
 
 interface LayoutProps {

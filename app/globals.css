@@ -93,6 +93,10 @@ body {
 
 }
 
+button{
+  cursor: pointer !important;
+}
+
 /* Ensure proper layout with footer */
 .dashboard-container {
   height: 100vh;

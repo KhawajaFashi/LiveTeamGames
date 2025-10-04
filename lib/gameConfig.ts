@@ -87,6 +87,55 @@ export const gameConfig: Record<string, GameData> = {
                 lastEdited: '23.09.2025 15:45'
             },
             {
+                name: 'Mission Beta',
+                count: '5',
+                lang: 'EN',
+                status: 'red',
+                lastEdited: '23.09.2025 15:45'
+            },
+            {
+                name: 'Mission Beta',
+                count: '5',
+                lang: 'EN',
+                status: 'red',
+                lastEdited: '23.09.2025 15:45'
+            },
+            {
+                name: 'Mission Beta',
+                count: '5',
+                lang: 'EN',
+                status: 'red',
+                lastEdited: '23.09.2025 15:45'
+            },
+            {
+                name: 'Mission Beta',
+                count: '5',
+                lang: 'EN',
+                status: 'red',
+                lastEdited: '23.09.2025 15:45'
+            },
+            {
+                name: 'Mission Beta',
+                count: '5',
+                lang: 'EN',
+                status: 'red',
+                lastEdited: '23.09.2025 15:45'
+            },
+            {
+                name: 'Mission Beta',
+                count: '5',
+                lang: 'EN',
+                status: 'red',
+                lastEdited: '23.09.2025 15:45'
+            },
+            {
+                name: 'Mission Beta',
+                count: '5',
+                lang: 'EN',
+                status: 'red',
+                lastEdited: '23.09.2025 15:45'
+            },
+            {
                 name: 'Mission Gamma',
                 count: '12',
                 lang: 'EN',

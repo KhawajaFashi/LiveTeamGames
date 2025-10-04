@@ -14,19 +14,21 @@ export default async function GamesPage({ searchParams }: GamesPageProps) {
     const gameType = params?.name || 'magic-portal';
     const gameData = getGameData(gameType);
 
+    console.log('Game Type:', gameType);
+
     // If invalid game type, redirect to magic-portal
     if (!gameData) {
         redirect('/games?name=magic-portal');
     }
 
     return (
-        <div className="h-screen bg-white shadow-lg m-5">
+        <div className="h-full bg-white shadow-lg m-5">
             <div className='border-b border-gray-200 p-4'>
                 <h1 className="text-3xl font-bold text-gray-800">{gameData.title}</h1>
             </div>
 
             {/* Game Table */}
-            <GameTable gameData={gameData} />
+            <GameTable gameData={gameData} gameType={gameType} />
         </div>
     );
 }
