@@ -8,7 +8,6 @@ type ErrorState = {
     playingTime?: string;
 };
 
-
 interface RouteTemplateSelectProps {
     templateId: string;
     setTemplateId: (id: string) => void;

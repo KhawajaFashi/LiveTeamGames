@@ -70,7 +70,6 @@ const Map: React.FC<MapProps> = ({ teams, selectedTeamNo }) => {
 
     useEffect(() => {
         updateMarkers();
-        // eslint-disable-next-line
     }, [teams, selectedTeamNo]);
 
     return (

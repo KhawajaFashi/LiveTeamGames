@@ -33,6 +33,7 @@ const TeamDetailsTable: React.FC<TeamDetailsTableProps> = ({ team, onBack, Opera
     const filterButtonRef = useRef<HTMLDivElement | null>(null);
 
     const [menuOpenIdx, setMenuOpenIdx] = useState<number | null>(null);
+    // const [showTeamDetailsIdx, setShowTeamDetailsIdx] = useState<number | null>(null);
     const [scoreModalIdx, setScoreModalIdx] = useState<number | null>(null);
     const [scoreType, setScoreType] = useState<'add' | 'subtract'>('add');
     const [scoreValue, setScoreValue] = useState<string>('');
@@ -157,7 +158,7 @@ const TeamDetailsTable: React.FC<TeamDetailsTableProps> = ({ team, onBack, Opera
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                             {team.riddles?.map((riddle, index) => (
-                                <tr key={riddle.no} onClick={() => setSelectedTeam(team.no)}>
+                                <tr key={riddle.no}>
                                     <td className="px-2 py-2 text-center">{riddle.no}</td>
                                     <td className="px-2 py-2 text-center">{riddle.riddleName}</td>
                                     <td className="px-2 py-2 text-center">{riddle.episode}</td>

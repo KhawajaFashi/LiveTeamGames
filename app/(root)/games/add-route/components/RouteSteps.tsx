@@ -5,21 +5,17 @@ import { TemplateTable, templateArray, TemplateDetail, Template } from '@/lib/ro
 import RouteTemplateSelect from './RouteTemplateSelect';
 import RouteSharedInput from './RouteSharedInput';
 
-
-type ErrorState = {
-    shareCode?: string;
-    templateId?: string;
-    routeName?: string;
-    playingTime?: string;
-};
-
-
 const RouteSteps: React.FC<StepProps> = ({ step, totalSteps, routeType, gameId, onNext, onBack, onCancel }) => {
     const [shareCode, setShareCode] = useState('');
     const [templateId, setTemplateId] = useState('');
     const [routeName, setRouteName] = useState('');
     const [playingTime, setPlayingTime] = useState('');
-    const [errors, setErrors] = useState<ErrorState>({});
+    const [errors, setErrors] = useState<{
+        shareCode?: string;
+        templateId?: string;
+        routeName?: string
+        playingTime?: string
+    }>({});
 
     const [showPopup, setShowPopup] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);

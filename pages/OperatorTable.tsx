@@ -52,6 +52,7 @@ const OperatorTable: React.FC<OperatorTableProps> = ({ OperatorData }) => {
     const [activeView, setActiveView] = useState<ActiveView>(null);
     const [editTeamName, setEditTeamName] = useState<string>("");
     const [deleteConfirmText, setDeleteConfirmText] = useState("");
+    
 
     // Show TeamDetailsTable or TeamDetailsPhotos or TeamDetailsVideos if requested
     let detailsContent: React.ReactNode = null;

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import React, { useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface ProfilePopupProps {
     isOpen: boolean;
@@ -8,6 +9,7 @@ interface ProfilePopupProps {
 }
 
 const ProfilePopup: React.FC<ProfilePopupProps> = ({ isOpen, onClose, buttonRef }) => {
+    const router = useRouter();
     const popupRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -44,7 +46,13 @@ const ProfilePopup: React.FC<ProfilePopupProps> = ({ isOpen, onClose, buttonRef 
 
             {/* Menu Items */}
             <div className="py-2">
-                <button className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3 text-sm text-gray-700">
+                <button
+                    className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3 text-sm text-gray-700"
+                    onClick={() => {
+                        router.push('/profile/myprofile');
+                        onClose();
+                    }}
+                >
                     <Image src="/profile.png" alt="User Icon" width={16} height={16} className="w-4 h-4 text-gray-500" />
                     <span>My Profile</span>
                 </button>

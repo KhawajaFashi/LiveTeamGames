@@ -26,12 +26,14 @@ interface TeamDetailsVideosProps {
 
 const TeamDetailsVideos: React.FC<TeamDetailsVideosProps> = ({ team, onBack, OperatorData }) => {
     const [mapView, setMapView] = useState<"map" | "satellite">("map");
-    const [selectedTeam] = useState<number | null>(null);
+    const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     const { teams } = OperatorData ?? {};
     const filterButtonRef = useRef<HTMLDivElement | null>(null);
 
+    // const [menuOpenIdx, setMenuOpenIdx] = useState<number | null>(null);
+    // const [showTeamDetailsIdx, setShowTeamDetailsIdx] = useState<number | null>(null);
     const [scoreModalIdx, setScoreModalIdx] = useState<number | null>(null);
     const [scoreType, setScoreType] = useState<'add' | 'subtract'>('add');
     const [scoreValue, setScoreValue] = useState<string>('');

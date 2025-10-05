@@ -1,5 +1,6 @@
 "use client";
-import React from 'react';
+import FilterPopup from '@/components/Statistics/StatisticsFilterPopup';
+import React, { useRef, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, PieLabelRenderProps, TooltipProps } from 'recharts';
 
 interface PieData extends Record<string, unknown> {
@@ -30,6 +31,8 @@ const COLORS = ['#5B8FF9', '#00C49F'];
 const BAR_COLOR = '#69b7eb';
 
 export default function StatisticsPage() {
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const filterButtonRef = useRef<HTMLDivElement | null>(null);
 
     // Custom formatter for tooltip
     const CustomTooltip = (props: TooltipProps<number, string>) => {
@@ -57,9 +60,20 @@ export default function StatisticsPage() {
                 <div className="bg-white rounded-sm shadow-sm">
                     <div className="flex justify-between items-center p-5 pb-3 mb-6 border-b border-gray-200 w-full">
                         <h1 className="text-2xl font-bold text-gray-800">Statistics</h1>
-                        <button className="px-3 py-1 bg-[var(--color-accent)] text-white rounded-md">
-                            Filter
-                        </button>
+                        <div
+                            ref={filterButtonRef}
+                            className="flex flex-col items-start gap-3">
+                            <button
+                                onClick={() => setIsFilterOpen(true)}
+                                className="px-2 py-1 bg-[#00A3FF] text-white rounded-sm flex items-center gap-2 whitespace-nowrap"
+                            >
+                                Filter
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <FilterPopup isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} buttonRef={filterButtonRef} />
+                        </div>
                     </div>
                     {/* Bar Chart Section */}
                     <div className="h-[250px] w-full">
