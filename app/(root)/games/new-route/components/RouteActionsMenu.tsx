@@ -11,9 +11,12 @@ interface RouteActionsMenuProps {
     onClose: () => void;
     gameID: string;
     routeID: string;
+    onEdit?: () => void;
+    onChangeType?: () => void;
+    onDelete?: () => void;
 }
 
-const RouteActionsMenu: React.FC<RouteActionsMenuProps> = ({ open, onOpen, onClose, gameID, routeID }) => {
+const RouteActionsMenu: React.FC<RouteActionsMenuProps> = ({ open, onOpen, onClose, gameID, routeID, onEdit, onChangeType, onDelete }) => {
     const router = useRouter();
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -31,8 +34,16 @@ const RouteActionsMenu: React.FC<RouteActionsMenuProps> = ({ open, onOpen, onClo
     }, [open, onClose]);
 
     const handleEdit = () => {
-        router.push(`/games/new-route?gameID=${gameID}&routeID=${routeID}`);
         onClose();
+        if (onEdit) onEdit();
+    };
+    const handleChangeType = () => {
+        onClose();
+        if (onChangeType) onChangeType();
+    };
+    const handleDelete = () => {
+        onClose();
+        if (onDelete) onDelete();
     };
 
     return (
@@ -48,11 +59,11 @@ const RouteActionsMenu: React.FC<RouteActionsMenuProps> = ({ open, onOpen, onClo
                         <FaRegEdit />
                         Edit
                     </button>
-                    <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2">
+                    <button onClick={handleChangeType} className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2">
                         <CgArrowsExchange />
                         Change Type
                     </button>
-                    <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-red-600">
+                    <button onClick={handleDelete} className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-red-600">
                         <MdDelete />
                         Delete
                     </button>

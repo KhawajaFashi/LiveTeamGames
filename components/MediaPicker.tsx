@@ -191,8 +191,8 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose }) => {
                     <h2 className="text-xl font-semibold">Choose From Media</h2>
                     <button className="text-gray-400 hover:text-gray-600 text-2xl" onClick={onClose}>&times;</button>
                 </div>
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="relative">
+                <div className="flex max-md:flex-col items-center justify-between gap-2 mb-4">
+                    <div className="relative flex gap-4">
                         <button className="bg-gray-100 px-3 py-1 rounded text-gray-700" onClick={() => setOpenFilter((prev) => !prev)}>
                             Filter <span className="ml-1">&#9662;</span>
                         </button>
@@ -201,8 +201,6 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose }) => {
                                 <button key={opt} className={`block px-4 py-1 text-sm w-full text-left ${activeFilter === opt ? 'bg-gray-100' : ''}`} onClick={() => setActiveFilter(opt)}>{opt}</button>
                             ))}
                         </div>
-                    </div>
-                    <div className="relative">
                         <button className="bg-gray-100 px-3 py-1 rounded text-gray-700" onClick={() => setOpenSort((prev) => !prev)}>
                             Sort by <span className="ml-1">&#9662;</span>
                         </button>
@@ -214,8 +212,10 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose }) => {
                     </div>
 
                     <input type="text" className="ml-2 px-3 py-1 border rounded w-64" placeholder="Search file" value={search} onChange={e => setSearch(e.target.value)} />
-                    <button className="ml-auto bg-gray-300 px-4 py-1 rounded text-gray-700" onClick={() => setShowAddFolder(true)}>Add Folder</button>
-                    <button className="bg-[#009FE3] px-4 py-1 rounded text-white font-semibold" onClick={() => setShowUpload(true)}>Upload</button>
+                    <div className='flex gap-4'>
+                        <button className="ml-auto bg-gray-300 px-4 py-1 rounded text-gray-700" onClick={() => setShowAddFolder(true)}>Add Folder</button>
+                        <button className="bg-[#009FE3] px-4 py-1 rounded text-white font-semibold" onClick={() => setShowUpload(true)}>Upload</button>
+                    </div>
                 </div>
                 <div className="mb-2 text-sm text-[#009FE3] cursor-pointer">
                     {media.map((folder, idx) => (

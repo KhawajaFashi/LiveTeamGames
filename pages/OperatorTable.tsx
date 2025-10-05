@@ -1,5 +1,6 @@
 "use client";
 import React, { useRef, useState } from "react";
+import AnimateShowdown from '@/components/OperatorComponents/AnimateShowdown';
 import OperatorActionsMenu from '@/components/OperatorComponents/OperatorActionsMenu';
 import TeamDetailsTable from '@/components/TeamDetails/TeamDetailsTable';
 import TeamDetailsPhotos from '@/components/TeamDetails/TeamDetailsPhotos';
@@ -52,7 +53,8 @@ const OperatorTable: React.FC<OperatorTableProps> = ({ OperatorData }) => {
     const [activeView, setActiveView] = useState<ActiveView>(null);
     const [editTeamName, setEditTeamName] = useState<string>("");
     const [deleteConfirmText, setDeleteConfirmText] = useState("");
-    
+    const [showAnimateShowdown, setShowAnimateShowdown] = useState(false);
+
 
     // Show TeamDetailsTable or TeamDetailsPhotos or TeamDetailsVideos if requested
     let detailsContent: React.ReactNode = null;
@@ -182,10 +184,17 @@ const OperatorTable: React.FC<OperatorTableProps> = ({ OperatorData }) => {
                     />
                 </div>
                 {/* Animate Showdown Button */}
-                <button className="px-3 py-1 bg-[#00A3FF] text-white rounded-sm">
+                <button className="px-3 py-1 bg-[#00A3FF] text-white rounded-sm" onClick={() => setShowAnimateShowdown(true)}>
                     Animate Showdown
                 </button>
             </div>
+            {/* Animate Showdown Popup */}
+            {showAnimateShowdown && (
+                <AnimateShowdown
+                    teams={teams}
+                    onClose={() => setShowAnimateShowdown(false)}
+                />
+            )}
             {/* Main Content */}
             <div className="flex max-lg:flex-col gap-6 h-100">
                 {/* Map Section */}
