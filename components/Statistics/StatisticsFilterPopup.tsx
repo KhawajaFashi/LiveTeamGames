@@ -13,7 +13,7 @@ const FilterPopup: React.FC<FilterPopupProps> = ({ isOpen, onClose, buttonRef })
         types: "Real Games",
         from: "",
         to: "",
-        games: "Operation Mindfall",
+        games: "Game1",
     });
 
     useEffect(() => {
@@ -101,9 +101,9 @@ const FilterPopup: React.FC<FilterPopupProps> = ({ isOpen, onClose, buttonRef })
                         value={filters.games}
                         onChange={(e) => setFilters({ ...filters, games: e.target.value })}
                     >
-                        <option value="operation-mindfall">Operation Mindfall</option>
-                        <option value="magic-portal">Magic Portal</option>
-                        <option value="blackout">BlackOut</option>
+                        <option value="game1">Game1</option>
+                        <option value="game2">Game2</option>
+                        <option value="game3">Game3</option>
                     </select>
                 </div>
             </div>

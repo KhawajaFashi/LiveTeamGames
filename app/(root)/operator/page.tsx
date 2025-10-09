@@ -10,13 +10,13 @@ interface GamesPageProps {
 }
 
 export default async function GamesPage({ searchParams }: GamesPageProps) {
-    const params = await searchParams;
-    const operatorType = params?.name || 'magic-portal';
+    const params =  await searchParams;
+    const operatorType = params?.name || 'game1';
     const OperatorData = getOperatorData(operatorType);
 
     // If invalid game type, redirect to magic-portal
     if (!OperatorData) {
-        redirect('/operator?name=magic-portal');
+        redirect('/operator?name=game2');
     }
 
 

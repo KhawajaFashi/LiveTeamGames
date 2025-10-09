@@ -125,7 +125,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive = false, hasChe
     return (
         <div>
             {href ? (
-                <Link href={href} target={`${href === "https://cluetivity.zendesk.com/hc/en-us" ? '_blank' : ''}`}>
+                <Link href={href} target={`${href === "" ? '_blank' : ''}`}>
                     {content}
                 </Link>
             ) : (
@@ -227,9 +227,9 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ isSidebarOpen =
                     setExpandedItem={setExpandedItem}
                 >
                     <Suspense fallback={<div>Loading...</div>}>
-                        <SubNavItem label="Magic Portal" href="/games?name=magic-portal" />
-                        <SubNavItem label="Operation Mindfall" href="/games?name=operation-mindfall" />
-                        <SubNavItem label="Blackout" href="/games?name=blackout" />
+                        <SubNavItem label="Game1" href="/games?name=game1" />
+                        <SubNavItem label="Game2" href="/games?name=game2" />
+                        <SubNavItem label="Game3" href="/games?name=game3" />
                     </Suspense>
                 </NavItem>
 
@@ -252,9 +252,9 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ isSidebarOpen =
                     setExpandedItem={setExpandedItem}
                 >
                     <Suspense fallback={<div>Loading...</div>}>
-                        <SubNavItem label="Magic Portal" href="/operator?name=magic-portal" />
-                        <SubNavItem label="Operation Mindfall" href="/operator?name=operation-mindfall" />
-                        <SubNavItem label="Blackout" href="/operator?name=blackout" />
+                        <SubNavItem label="Game1" href="/operator?name=game1" />
+                        <SubNavItem label="Game2" href="/operator?name=game2" />
+                        <SubNavItem label="Game3" href="/operator?name=game3" />
                     </Suspense>
                 </NavItem>
 
@@ -286,9 +286,9 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ isSidebarOpen =
                     setExpandedItem={setExpandedItem}
                 >
                     <Suspense fallback={<div>Loading...</div>}>
-                        <SubNavItem label="Magic Portal" href="/highscores?name=magic-portal" />
-                        <SubNavItem label="Operation Mindfall" href="/highscores?name=operation-mindfall" />
-                        <SubNavItem label="Blackout" href="/highscores?name=blackout" />
+                        <SubNavItem label="Game1" href="/highscores?name=game1" />
+                        <SubNavItem label="Game2" href="/highscores?name=game2" />
+                        <SubNavItem label="Game3" href="/highscores?name=game3" />
                     </Suspense>
                 </NavItem>
 

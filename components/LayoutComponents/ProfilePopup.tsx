@@ -42,7 +42,7 @@ const ProfilePopup: React.FC<ProfilePopupProps> = ({ isOpen, onClose, buttonRef 
         >
             <div className="bg-[#000f24] p-6 text-white">
                 <div className="font-semibold text-sm">DemoSet20</div>
-                <div className="text-xs text-gray-300">demoset20@cluetivity.com</div>
+                <div className="text-xs text-gray-300">demoset20@liveteamgames.com</div>
             </div>
 
             {/* Menu Items */}

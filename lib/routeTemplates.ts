@@ -62,25 +62,25 @@ export const TemplateTable: Record<string, TemplateDetail[]> = {
 export const templateArray: Template[] = [
     {
         id: 'tpl-1',
-        title: '1. Magic Portal Adult (Previously Remastered)',
+        title: '1. Game2 Adult (Previously Remastered)',
         subtitle: 'Difficulty: Advanced (4/5). Target Group: 16+ Years. Playing Time: 120-180 Min',
         description: '',
     },
     {
         id: 'tpl-2',
-        title: '2. Magic Portal Family Game & Kids Birthday',
+        title: '2. Game2 Family Game & Kids Birthday',
         subtitle: 'Difficulty: Medium (3/5). Target Group: 10+ Years. Playing Time: 120-150 Min',
         description: '',
     },
     {
         id: 'tpl-3',
-        title: '3. Magic Portal Linear',
+        title: '3. Game2 Linear',
         subtitle: 'This is a linear route where the order is predefined and players have to solve one puzzle after the other.',
         description: '',
     },
     {
         id: 'tpl-4',
-        title: '4. Magic Portal No ActionPack / Indoor',
+        title: '4. Game2 No ActionPack / Indoor',
         subtitle: 'A special route template to play without the ActionPack or indoor with a printed mission sheet.',
         description: '',
     },

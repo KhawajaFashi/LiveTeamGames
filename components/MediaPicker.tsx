@@ -22,7 +22,7 @@ const initialMedia = [
             { type: 'image', name: 'fries.jpg', src: '/stats.png', lastModified: '30.07.2025 17:35', size: 611 },
         ]
     },
-    { type: 'folder', name: 'Operation Mindfall with Action Pack', files: [] },
+    { type: 'folder', name: 'Game1 with Action Pack', files: [] },
 ];
 
 interface MediaPickerProps {

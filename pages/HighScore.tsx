@@ -175,12 +175,12 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreData }) => {
                 <HighscoreAdd
                     open={addOpen}
                     onClose={() => setAddOpen(false)}
-                    gameName={liveHighscores[0]?.game || "Operation Mindfall"}
+                    gameName={liveHighscores[0]?.game || "Game1"}
                     onAdd={() => {
                         // setLiveHighscores(prev => [
                         //     ...prev,
                         //     {
-                        //         game: liveHighscores[0]?.game || "Operation Mindfall",
+                        //         game: liveHighscores[0]?.game || "Game1",
                         //         name,
                         //         teams: 0,
                         //         lastEdited: new Date().toLocaleString(),

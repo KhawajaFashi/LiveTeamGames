@@ -10,7 +10,7 @@ import { RouteType } from '../types';
 const AddRoute = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const game = searchParams?.get('gameID') || 'magic-portal';
+    const game = searchParams?.get('gameID') || 'game1';
 
     const [routeType, setRouteType] = useState<RouteType>('template');
     const [step, setStep] = useState(1);

@@ -46,9 +46,9 @@ export interface OperatorData {
 }
 
 export const OperatorConfig: Record<string, OperatorData> = {
-    'magic-portal': {
-        name: 'Magic Portal',
-        title: 'Magic Portal',
+    'game2': {
+        name: 'Game2',
+        title: 'Game2',
         searchPlaceholder: 'Search Portal Name...',
         addButtonText: 'Create New Portal',
         teams: [
@@ -272,9 +272,9 @@ export const OperatorConfig: Record<string, OperatorData> = {
             }
         ]
     },
-    'operation-mindfall': {
-        name: 'Operation Mindfall',
-        title: 'Operation Mindfall',
+    'game1': {
+        name: 'Game1',
+        title: 'Game1',
         searchPlaceholder: 'Search Spy Mission...',
         addButtonText: 'Create New Mission',
         teams: [
@@ -344,10 +344,10 @@ export const OperatorConfig: Record<string, OperatorData> = {
             }
         ]
     },
-    'blackout': {
-        name: 'Blackout',
-        title: 'Blackout',
-        searchPlaceholder: 'Search Blackout Scenario...',
+    'game3': {
+        name: 'Game3',
+        title: 'Game3',
+        searchPlaceholder: 'Search Game3 Scenario...',
         addButtonText: 'Create New Scenario',
         teams: [
             {

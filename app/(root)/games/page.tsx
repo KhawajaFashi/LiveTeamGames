@@ -11,21 +11,21 @@ interface GamesPageProps {
 
 export default async function GamesPage({ searchParams }: GamesPageProps) {
     const params = await searchParams;
-    const gameType = params?.name || 'magic-portal';
+    const gameType = params?.name || 'game1';
     const gameData = getGameData(gameType);
 
-    const response = await fetch(`${process.env.API_URL}/games/fetch_data`, {
-        method: 'GET',
-    });
+    // const response = await fetch(`${process.env.API_URL}/games/fetch_data`, {
+    //     method: 'GET',
+    // });
 
-    const data = response.json();
-    console.log(data);
+    // const data = response.json();
+    // console.log(data);
 
     console.log('Game Type:', gameType);
 
     // If invalid game type, redirect to magic-portal
     if (!gameData) {
-        redirect('/games?name=magic-portal');
+        redirect('/games?name=game1');
     }
 
     return (

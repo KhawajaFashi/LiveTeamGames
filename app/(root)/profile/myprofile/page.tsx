@@ -1,4 +1,5 @@
 "use client";
+import api from "@/utils/axios";
 import React, { useState } from "react";
 
 const steps = ["Profile", "Settings", "Team Photos"];
@@ -37,6 +38,9 @@ const MyProfile: React.FC = () => {
     // Design of team photos
     const [addCompanyLogo, setAddCompanyLogo] = useState(false);
 
+    // const token = localStorage.getItem('uid');
+
+    
     // Save handler
     const handleSave = async () => {
         let newErrors: any = {};
@@ -67,10 +71,34 @@ const MyProfile: React.FC = () => {
         // Send to backend
         try {
             // Replace with your API call
-            // await api.post('/profile/update', { ...all fields... });
-            alert('Saved!');
+            const profileData = {
+                userName,
+                email,
+                userComapny,
+                oldPassword,
+                newPassword,
+                repeatPassword,
+                language,
+                adminCode,
+                credits,
+                storage,
+                senderEmailName,
+                replyEmail,
+                emailSubject,
+                emailContent,
+                emailLang,
+                companyName,
+                privacyPolicy,
+                addCompanyLogo
+            };
+            const response = await api.post('/profile/update_profile', profileData);
+            if (response.status === 200) {
+                console.log('Saved!', response.data.message);
+            }
+            // alert('Saved!');
         } catch (err) {
             setErrors({ submit: 'Failed to save. Try again.' });
+            console.log("Failed", err);
         }
     };
 

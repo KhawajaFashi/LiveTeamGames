@@ -13,15 +13,15 @@ const SubNavItem: React.FC<SubNavItemProps> = ({ label, href, isActive = false }
     const searchParams = useSearchParams();
 
     // Check if this submenu item is active based on both pathname and query parameter
-    const TypeName = searchParams?.get('name') || '';
+    const TypeName = searchParams?.get('name') || 'game1';
     const currentSection = pathname?.split('?')[0]; // Get the base path without query parameters
     const targetSection = href.split('?')[0]; // Get the target path without query parameters
 
     const isCurrentActive = isActive || (
         currentSection === targetSection && // Check if we're in the correct section
-        ((label === 'Magic Portal' && TypeName === 'magic-portal') ||
-            (label === 'Operation Mindfall' && TypeName === 'operation-mindfall') ||
-            (label === 'Blackout' && TypeName === 'blackout'))
+        ((label === 'Game2' && TypeName === 'game2') ||
+            (label === 'Game1' && TypeName === 'game1') ||
+            (label === 'Game3' && TypeName === 'game3'))
     );
 
     return (

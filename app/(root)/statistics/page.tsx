@@ -23,7 +23,7 @@ const pieData: PieData[] = [
 
 // Sample data for bar chart
 const barData: BarData[] = [
-    { name: 'May 2023', value: 5, game: 'Operation Mindfall' }
+    { name: 'May 2023', value: 5, game: 'Game1' }
 ];
 
 // Custom colors
@@ -92,7 +92,7 @@ export default function StatisticsPage() {
                     {/* Game Legend */}
                     <div className="mt-4 flex items-center justify-center gap-2">
                         <div className="w-4 h-4" style={{ backgroundColor: BAR_COLOR }} />
-                        <span>Operation Mindfall</span>
+                        <span>Game1</span>
                     </div>
                 </div>
 

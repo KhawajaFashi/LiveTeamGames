@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
                             href="#"
                             className="text-blue-600 hover:text-blue-800 font-medium pl-1"
                         >
-                            Cluetivity
+                            LiveTeamGames
                         </Link></span>
                     <span>|</span>
                     <Link

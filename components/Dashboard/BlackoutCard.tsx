@@ -2,12 +2,12 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const BlackoutCard: React.FC = () => {
+const Game3Card: React.FC = () => {
     return (
         <div className="bg-white rounded-lg shadow-sm p-6">
 
-            {/* Blackout Image */}
-            <Image src="/BO.jpg" alt='blackout' width={900} height={900} className='w-86 h-50' />
+            {/* Game3 Image */}
+            <Image src="/BO.jpg" alt='Game3' width={900} height={900} className='w-86 h-50' />
 
             <h3 className="text-lg font-bold text-gray-800 mb-3">Live Team Games User Guidelines</h3>
 
@@ -37,4 +37,4 @@ const BlackoutCard: React.FC = () => {
     );
 };
 
-export default BlackoutCard;
+export default Game3Card;

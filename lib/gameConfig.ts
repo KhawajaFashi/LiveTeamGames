@@ -1,7 +1,7 @@
 
 // fetching_data();
 // export const fetching_data = async () => {   
-    
+
 // }
 
 
@@ -28,9 +28,9 @@ export interface GameData {
 }
 
 export const gameConfig: Record<string, GameData> = {
-    'magic-portal': {
-        name: 'Magic Portal',
-        title: 'Magic Portal',
+    'game2': {
+        name: 'Game2',
+        title: 'Game2',
         searchPlaceholder: 'Search Route Name...',
         addButtonText: 'Add New Route',
         columns: {
@@ -65,9 +65,9 @@ export const gameConfig: Record<string, GameData> = {
             }
         ]
     },
-    'operation-mindfall': {
-        name: 'Operation Mindfall',
-        title: 'Operation Mindfall',
+    'game1': {
+        name: 'Game1',
+        title: 'Game1',
         searchPlaceholder: 'Search Mission Name...',
         addButtonText: 'Add New Mission',
         columns: {
@@ -151,9 +151,9 @@ export const gameConfig: Record<string, GameData> = {
             }
         ]
     },
-    'blackout': {
-        name: 'Blackout',
-        title: 'Blackout',
+    'game3': {
+        name: 'Game3',
+        title: 'Game3',
         searchPlaceholder: 'Search Scenario Name...',
         addButtonText: 'Add New Scenario',
         columns: {

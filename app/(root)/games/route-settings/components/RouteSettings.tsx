@@ -17,7 +17,7 @@ const RouteSettings = () => {
     const [adminCodeDefault, setAdminCodeDefault] = useState(true);
 
     // Highscore
-    const [highscore, setHighscore] = useState('Operation Mindfall (Default)');
+    const [highscore, setHighscore] = useState('Game1 (Default)');
 
     // Languages
     const [languages, setLanguages] = useState(['English']);
@@ -53,7 +53,7 @@ const RouteSettings = () => {
             <div className="flex justify-between items-center border-b border-gray-200 pb-4 mb-6">
                 <h1 className="text-3xl font-bold">Route Settings</h1>
                 <button className="text-[#009FE3] font-medium" onClick={() => {
-                    if(!routeIdShow)
+                    if (!routeIdShow)
                         setRouteIdShow(true);
                     else
                         setRouteIdShow(false);
@@ -101,8 +101,8 @@ const RouteSettings = () => {
                         {/* <div> */}
                         <label className="block text-gray-700 font-medium mb-1">Connected Highscore :</label>
                         <select className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={highscore} onChange={e => setHighscore(e.target.value)}>
-                            <option>Operation Mindfall (Default)</option>
-                            <option>Magic Portal</option>
+                            <option>Game1 (Default)</option>
+                            <option>Game2</option>
                             <option>Other</option>
                         </select>
                         {/* </div> */}

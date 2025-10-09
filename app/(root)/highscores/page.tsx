@@ -11,12 +11,12 @@ interface HighScorePageProps {
 
 export default async function HighScorePage({ searchParams }: HighScorePageProps) {
     const params = await searchParams;
-    const highScoreType = params?.name || 'magic-portal';
+    const highScoreType = params?.name || 'game1';
     const highScoreData = getScoreData(highScoreType);
 
     // If invalid game type, redirect to magic-portal
     if (!highScoreData) {
-        redirect('/highscores?name=magic-portal');
+        redirect('/highscores?name=game2');
     }
 
     return (
