@@ -1,3 +1,10 @@
+
+// fetching_data();
+// export const fetching_data = async () => {   
+    
+// }
+
+
 export interface GameData {
     name: string;
     title: string;
@@ -186,3 +193,6 @@ export const gameConfig: Record<string, GameData> = {
 export const getGameData = (gameType: string): GameData | null => {
     return gameConfig[gameType] || null;
 };
+// export const getFetchData = (fetchType: string): GameData | null => {
+//     return gameConfig[fetchType] || null;
+// };

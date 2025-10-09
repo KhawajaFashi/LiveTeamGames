@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import React, { useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import api from '@/utils/axios';
 
 interface ProfilePopupProps {
     isOpen: boolean;
@@ -64,7 +65,18 @@ const ProfilePopup: React.FC<ProfilePopupProps> = ({ isOpen, onClose, buttonRef 
                 </button>
 
 
-                <button className="mx-4 px-3 py-2 rounded-sm text-left hover:bg-[#00adee] hover:text-white flex items-center space-x-3 text-xs font-bold border-gray-100 border-1">
+                <button
+                    className="mx-4 px-3 py-2 rounded-sm text-left hover:bg-[#00adee] hover:text-white flex items-center space-x-3 text-xs font-bold border-gray-100 border-1"
+                    onClick={async () => {
+                        try {
+                            await api.post('/user/logout');
+                            router.push('/login');
+                            onClose();
+                        } catch (err) {
+                            // Optionally handle error
+                        }
+                    }}
+                >
                     <span>Logout</span>
                 </button>
             </div>

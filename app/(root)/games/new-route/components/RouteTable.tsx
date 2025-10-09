@@ -128,7 +128,7 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                     <button className="bg-[#009FE3] text-white px-4 py-1.5">English</button>
                     {/* Gear/settings icon */}
                     <button
-                        className="bg-[#009FE3] p-2.5 mr-5 flex items-center justify-center hover:bg-[#007bb5] focus:outline-none"
+                        className="bg-[#009FE3] p-2.5 flex items-center justify-center hover:bg-[#007bb5] focus:outline-none"
                         onClick={() => setSettingsModalOpen(true)}
                         aria-label="Route settings menu"
                     >
@@ -408,15 +408,15 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                         </div>
                                     )}
                                     {editRiddleOpen && (
-                                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.15)]">
-                                            <div className="bg-white rounded-lg shadow-xl w-[35%] max-w-full p-0 relative">
+                                        <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(0,0,0,0.15)]">
+                                            <div className="bg-white rounded-lg shadow-xl w-[35%] max-md:w-[95%] max-w-full p-0 relative my-5">
                                                 {/* Header: dark, title left, close right */}
                                                 <div className="flex items-center justify-between px-8 pt-0 pb-0 bg-[#00112b] rounded-t-md" style={{ minHeight: 56 }}>
                                                     <h2 className="text-xl font-semibold text-white py-8">{editName} (AR)</h2>
                                                     <button className="text-gray-400 hover:text-gray-200 text-2xl py-4" onClick={() => setEditRiddleOpen(false)}>&times;</button>
                                                 </div>
                                                 {/* Tabs */}
-                                                <div className="px-8 py-4 bg-white">
+                                                <div className="px-8 max-lg:px-4 py-4 bg-white">
                                                     <div className="flex gap-2 border-b border-gray-200 pb-0 mb-4 mt-0">
                                                         <button className={`px-4 py-2 text-sm font-medium ${tabs === 'Location' ? 'border-b-2 border-[#009FE3] text-[#009FE3]' : ''}`} onClick={() => setTabs('Location')}>Location</button>
                                                         <button className={`px-4 py-2 text-sm font-medium ${tabs === 'Riddle' ? 'border-b-2 border-[#009FE3] text-[#009FE3]' : ''}`} onClick={() => setTabs('Riddle')}>Riddle</button>
@@ -425,75 +425,154 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                                     </div>
                                                 </div>
                                                 {tabs === 'Location' &&
-                                                    <div className="px-8 pb-48 pt-3 bg-white">
+                                                    // <div className="">
+                                                    <div className="px-8 h-[350px] lg:h-[420px] pt-3 bg-white grid grid-cols-[1fr_3fr_24px] gap-x-4 gap-y-6 items-center mb-2">
                                                         {/* Form */}
-                                                        <div className="grid grid-cols-[1fr_3fr_24px] gap-x-4 gap-y-6 items-center mb-2">
-                                                            <label className="text-gray-700 font-medium text-left">Name <span className="text-red-500">*</span></label>
-                                                            <input type="text" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={editName} onChange={e => setEditName(e.target.value)} />
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            <label className="text-gray-700 font-medium text-ledt">Coordinates</label>
-                                                            <div className="flex flex-col gap-1">
-                                                                <button className="text-[#009FE3] text-sm font-medium text-left mb-1">&#128205; Set coordinates on map</button>
-                                                                <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={editCoordinates[0]} onChange={e => setEditName(e.target.value)} />
-                                                                <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={editCoordinates[1]} onChange={e => setEditName(e.target.value)} />
+                                                        <label className="text-gray-700 font-medium text-left">Name <span className="text-red-500">*</span></label>
+                                                        <input type="text" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={editName} onChange={e => setEditName(e.target.value)} />
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Enter a short, descriptive name for this riddle. It helps identify the riddle within the route.
                                                             </div>
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            <label className="text-gray-700 font-medium text-left">Radius <span className="text-red-500">*</span></label>
-                                                            <div className="flex items-center gap-2">
-                                                                <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={editRadius} onChange={e => setEditRadius(e.target.value)} />
-                                                                <span className="ml-2">Meters</span>
-                                                            </div>
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
+                                                        </span>
+                                                        <label className="text-gray-700 font-medium text-ledt">Coordinates</label>
+                                                        <div className="flex flex-col gap-1">
+                                                            <button className="text-[#009FE3] text-sm font-medium text-left mb-1">&#128205; Set coordinates on map</button>
+                                                            <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={editCoordinates[0]} onChange={e => setEditName(e.target.value)} />
+                                                            <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={editCoordinates[1]} onChange={e => setEditName(e.target.value)} />
                                                         </div>
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                GPS location where this riddle is triggered. Players must reach this point to activate it.
+                                                            </div>
+                                                        </span>
+                                                        <label className="text-gray-700 font-medium text-left">Radius <span className="text-red-500">*</span></label>
+                                                        <div className="flex items-center gap-2">
+                                                            <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={editRadius} onChange={e => setEditRadius(e.target.value)} />
+                                                            <span className="ml-2">Meters</span>
+                                                        </div>
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Distance (in meters) around the coordinates where the riddle becomes active. Use at least 10 meters for accuracy.
+                                                            </div>
+                                                        </span>
                                                     </div>
                                                 }
                                                 {tabs === 'Settings' &&
-                                                    <div className="px-8 pt-2 pb-0 bg-white overflow-y-auto max-h-[420px]">
-                                                        <div className="grid grid-cols-[1fr_2fr_24px] gap-x-4 gap-y-6 items-center mb-2">
-                                                            {/* Allowed Attempts */}
-                                                            <label className="text-gray-700 font-medium text-left">Allowed Attempts</label>
-                                                            <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" defaultValue="0" />
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* Allowed Time */}
-                                                            <label className="text-gray-700 font-medium text-left">Allowed Time</label>
-                                                            <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" placeholder="Allowed Time (Minutes)" />
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* Meta Data */}
-                                                            <label className="text-gray-700 font-medium text-left">Meta Data</label>
-                                                            <textarea className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" rows={3} />
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* Help Image */}
-                                                            <label className="text-gray-700 font-medium text-left">Help Image</label>
-                                                            <div className="flex flex-col gap-1">
-                                                                <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" alt="Help" className="w-48 h-32 object-cover rounded" />
+                                                    // <div className="px-8 pt-2 pb-0 bg-white overflow-y-auto max-h-[420px]">
+                                                    <div className="grid grid-cols-[1fr_2fr_24px] max-lg:text-[12px] gap-x-4 gap-y-6 items-center mb-2 px-8 pt-2 pb-0 bg-white overflow-y-auto h-[350px] lg:h-[420px] w-full">
+                                                        {/* Allowed Attempts */}
+                                                        <label className="text-gray-700 font-medium text-left">Allowed Attempts</label>
+                                                        <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" defaultValue="0" />
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Total number of attempts before the riddle locks. Set to 0 for unlimited tries.
                                                             </div>
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* Conditional Exit Point */}
-                                                            <label className="text-gray-700 font-medium text-left">Conditional Exit Point</label>
-                                                            <div className="flex items-center gap-2">
-                                                                <input type="checkbox" className="mr-2 w-4 h-4 accent-[#009FE3]" id="isExitPoint" />
-                                                                <label htmlFor="isExitPoint" className="text-gray-600 text-sm">Is Exit Point</label>
+                                                        </span>
+                                                        {/* Allowed Time */}
+                                                        <label className="text-gray-700 font-medium text-left">Allowed Time</label>
+                                                        <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" placeholder="Allowed Time (Minutes)" />
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Time limit (in seconds or minutes) to solve the riddle. Set to 0 for no limit.
                                                             </div>
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* AR Image Target */}
-                                                            <label className="text-gray-700 font-medium text-left">AR Image Target</label>
-                                                            <select className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded">
-                                                                <option>Custom Target</option>
-                                                                <option>Default Target</option>
-                                                            </select>
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* AR Image Preview */}
-                                                            <label className="text-gray-700 font-medium text-left">AR Image Preview</label>
-                                                            <div className="flex flex-col gap-1">
-                                                                <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80" alt="AR Target" className="w-48 h-32 object-cover rounded" />
+                                                        </span>
+                                                        {/* Meta Data */}
+                                                        <label className="text-gray-700 font-medium text-left">Meta Data</label>
+                                                        <textarea className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" rows={3} />
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Internal or developer-only info, e.g., custom tags, difficulty level, or backend identifiers.
                                                             </div>
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
+                                                        </span>
+                                                        {/* Help Image */}
+                                                        <label className="text-gray-700 font-medium text-left">Help Image</label>
+                                                        <div className="flex flex-col gap-1">
+                                                            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" alt="Help" className="w-48 h-32 object-cover rounded" />
                                                         </div>
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Optional image shown when players request a hint.
+                                                            </div>
+                                                        </span>
+                                                        {/* Conditional Exit Point */}
+                                                        <label className="text-gray-700 font-medium text-left">Conditional Exit Point</label>
+                                                        <div className="flex items-center gap-2">
+                                                            <input type="checkbox" className="mr-2 w-4 h-4 accent-[#009FE3]" id="isExitPoint" />
+                                                            <label htmlFor="isExitPoint" className="text-gray-600 text-sm">Is Exit Point</label>
+                                                        </div>
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Defines what happens after solving this riddle — e.g., unlocks a specific next riddle or triggers an event.
+                                                            </div>
+                                                        </span>
+                                                        {/* AR Image Target */}
+                                                        <label className="text-gray-700 font-medium text-left">AR Image Target</label>
+                                                        <select className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded">
+                                                            <option>Custom Target</option>
+                                                            <option>Default Target</option>
+                                                        </select>
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Upload the target image used to anchor AR content in the real world and preview it.
+                                                            </div>
+                                                        </span>
+                                                        {/* AR Image Preview */}
+                                                        <label className="text-gray-700 font-medium text-left">AR Image Preview</label>
+                                                        <div className="flex flex-col gap-1">
+                                                            <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80" alt="AR Target" className="w-48 h-32 object-cover rounded" />
+                                                        </div>
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Attach an AR video or image used for augmented reality riddles. Only applicable if the riddle type is AR.
+                                                            </div>
+                                                        </span>
+                                                        {/* </div> */}
                                                     </div>
                                                 }
                                                 {tabs === 'PRO' &&
-                                                    <div className="px-8 pt-2 pb-0 bg-white overflow-y-auto h-[420px]">
-                                                        <div className="grid grid-cols-[1fr_1fr] gap-x-4 gap-y-6 items-center mb-2">
+                                                    <div className="px-8 pt-2 bg-white overflow-y-auto h-[350px] lg:h-[420px]">
+                                                        <div className="grid grid-cols-[1fr_1fr] items-start gap-y-6">
                                                             {/* Conditional Exit Point */}
                                                             <label className="text-gray-700 font-medium text-left">Map Quest Marker Active:</label>
                                                             <div className="flex items-center gap-2">
@@ -505,77 +584,140 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                                                 <input type="checkbox" disabled className="mr-2 w-4 h-4 accent-[#009FE3]" id="isExitPoint" />
                                                                 <label htmlFor="isExitPoint" className="text-gray-600 text-sm">Use Default</label>
                                                             </div>
-                                                            </div>
-                                                            
+                                                        </div>
                                                     </div>
                                                 }
                                                 {tabs === 'Riddle' &&
-                                                    <div className="px-8 pt-2 pb-0 bg-white overflow-y-auto max-h-[420px]">
-                                                        <div className="grid grid-cols-[1fr_2fr_24px] gap-x-4 gap-y-6 items-center mb-2">
-                                                            {/* Picture */}
-                                                            <label className="text-gray-700 font-medium text-left">Picture</label>
-                                                            <div className="flex flex-col gap-1">
-                                                                <button className="text-[#009FE3] text-sm font-medium text-left mb-1">Select from Media</button>
-                                                            </div>
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* AR Video/Image */}
-                                                            <label className="text-gray-700 font-medium text-left">AR Video or Image</label>
-                                                            <div className="flex flex-col gap-1">
-                                                                <div className="w-48 h-32 bg-gray-200 rounded flex items-center justify-center">
-                                                                    <svg width="48" height="48" fill="none" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#e5e7eb" /><polygon points="20,16 36,24 20,32" fill="#bbb" /></svg>
-                                                                </div>
-                                                            </div>
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* Description */}
-                                                            <label className="text-gray-700 font-medium text-left">Description</label>
-                                                            <textarea className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" rows={4} defaultValue={"Hey there! Professor Hastings here.\nAh, you've found the newspaper — clever crew!\nScan my picture to receive your first task."} />
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* Solutions */}
-                                                            <label className="text-gray-700 font-medium text-left">Solutions</label>
-                                                            <div className="flex flex-col gap-1">
-                                                                <div className="flex gap-2 flex-wrap mb-1">
-                                                                    {solutions.map((sol, i) => (
-                                                                        <span key={sol + i} className="bg-[#009FE3] text-white px-2 py-1 rounded text-xs flex items-center">
-                                                                            {sol}
-                                                                            <button className="ml-1 text-white" onClick={() => setSolutions(solutions.filter((_, idx) => idx !== i))}>&times;</button>
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                                <input
-                                                                    className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded"
-                                                                    placeholder="Add solution.."
-                                                                    value={solutionInput}
-                                                                    onChange={e => setSolutionInput(e.target.value)}
-                                                                    onKeyDown={e => {
-                                                                        if (e.key === 'Enter' && solutionInput.trim()) {
-                                                                            if (!solutions.includes(solutionInput.trim())) {
-                                                                                setSolutions([...solutions, solutionInput.trim()]);
-                                                                            }
-                                                                            setSolutionInput('');
-                                                                            e.preventDefault();
-                                                                        }
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* Hint */}
-                                                            <label className="text-gray-700 font-medium text-left">Hint</label>
-                                                            <textarea className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" rows={3} defaultValue={"1. Scan the professor’s image in your newspaper\n2. Find the 4 hidden numbers inside the pictures\n3. Put them in the right order to reveal the year Captain Kidd"} />
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* Max Score */}
-                                                            <label className="text-gray-700 font-medium text-left">Max Score</label>
-                                                            <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" defaultValue="1000" />
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* Tries without penalty */}
-                                                            <label className="text-gray-700 font-medium text-left">Tries without penalty</label>
-                                                            <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" defaultValue="1" />
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
-                                                            {/* % Deduction */}
-                                                            <label className="text-gray-700 font-medium text-left">% Deduction</label>
-                                                            <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" defaultValue="10" />
-                                                            <span className="text-gray-400 cursor-pointer" title="Info"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#e5e7eb" /><text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text></svg></span>
+                                                    // <div className="px-8 pt-2 pb-0 bg-white overflow-y-auto max-h-[420px]">
+                                                    <div className="grid grid-cols-[1fr_2fr_24px] gap-x-4 gap-y-6 items-center mb-2 px-8 pt-2 pb-0 bg-white overflow-y-auto h-[350px] lg:h-[420px] text-[12px]">
+                                                        {/* Picture */}
+                                                        <label className="text-gray-700 font-medium text-left">Picture</label>
+                                                        <div className="flex flex-col gap-1">
+                                                            <button className="text-[#009FE3] text-sm font-medium text-left mb-1">Select from Media</button>
                                                         </div>
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Upload an image shown to players during the riddle. Useful for visual clues or environment immersion.
+                                                            </div>
+                                                        </span>
+                                                        {/* AR Video/Image */}
+                                                        <label className="text-gray-700 font-medium text-left">AR Video or Image</label>
+                                                        <div className="flex flex-col gap-1">
+                                                            <div className="w-48 h-32 bg-gray-200 rounded flex items-center justify-center">
+                                                                <svg width="48" height="48" fill="none" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#e5e7eb" /><polygon points="20,16 36,24 20,32" fill="#bbb" /></svg>
+                                                            </div>
+                                                        </div>
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Attach an AR video or image used for augmented reality riddles. Only applicable if the riddle type is AR.
+                                                            </div>
+                                                        </span>
+                                                        {/* Description */}
+                                                        <label className="text-gray-700 font-medium text-left">Description</label>
+                                                        <textarea className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" rows={4} defaultValue={"Hey there! Professor Hastings here.\nAh, you've found the newspaper — clever crew!\nScan my picture to receive your first task."} />
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                A short narrative or instruction displayed to the team when they reach this riddle.
+                                                            </div>
+                                                        </span>
+                                                        {/* Solutions */}
+                                                        <label className="text-gray-700 font-medium text-left">Solutions</label>
+                                                        <div className="flex flex-col gap-1">
+                                                            <div className="flex gap-2 flex-wrap mb-1">
+                                                                {solutions.map((sol, i) => (
+                                                                    <span key={sol + i} className="bg-[#009FE3] text-white px-2 py-1 rounded text-xs flex items-center">
+                                                                        {sol}
+                                                                        <button className="ml-1 text-white" onClick={() => setSolutions(solutions.filter((_, idx) => idx !== i))}>&times;</button>
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                            <input
+                                                                className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded"
+                                                                placeholder="Add solution.."
+                                                                value={solutionInput}
+                                                                onChange={e => setSolutionInput(e.target.value)}
+                                                                onKeyDown={e => {
+                                                                    if (e.key === 'Enter' && solutionInput.trim()) {
+                                                                        if (!solutions.includes(solutionInput.trim())) {
+                                                                            setSolutions([...solutions, solutionInput.trim()]);
+                                                                        }
+                                                                        setSolutionInput('');
+                                                                        e.preventDefault();
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Enter one or more correct answers that solve the riddle.
+                                                            </div>
+                                                        </span>
+                                                        {/* Hint */}
+                                                        <label className="text-gray-700 font-medium text-left">Hint</label>
+                                                        <textarea className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" rows={3} defaultValue={"1. Scan the professor’s image in your newspaper\n2. Find the 4 hidden numbers inside the pictures\n3. Put them in the right order to reveal the year Captain Kidd"} />
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Provide a helpful clue that can be revealed if players are stuck.
+                                                            </div>
+                                                        </span>
+                                                        {/* Max Score */}
+                                                        <label className="text-gray-700 font-medium text-left">Max Score</label>
+                                                        <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" defaultValue="1000" />
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Maximum points awarded for solving this riddle without errors or hints.
+                                                            </div>
+                                                        </span>
+                                                        {/* Tries without penalty */}
+                                                        <label className="text-gray-700 font-medium text-left">Tries without penalty</label>
+                                                        <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" defaultValue="1" />
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Number of incorrect attempts allowed before score deductions start.
+                                                            </div>
+                                                        </span>
+                                                        {/* % Deduction */}
+                                                        <label className="text-gray-700 font-medium text-left">% Deduction</label>
+                                                        <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" defaultValue="10" />
+                                                        <span className="text-black cursor-pointer group relative" title="Info">
+                                                            <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="12" fill="#e5e7eb" />
+                                                                <text x="12" y="16" textAnchor="middle" fontSize="14" fill="#333">?</text>
+                                                            </svg>
+                                                            <div className="absolute z-10 w-64 p-3 bg-white border border-gray-200 rounded -translate-x-[90%] opacity-0 shadow-lg text-xs text-gray-700 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                                Percentage of points deducted after each failed attempt beyond the penalty-free tries.
+                                                            </div>
+                                                        </span>
                                                     </div>
+                                                    // </div>
                                                 }
                                                 {/* Footer */}
                                                 <div className="flex items-center justify-between px-8 py-4 border-t border-gray-200 bg-white rounded-b-lg mt-2">

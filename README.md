@@ -1,4 +1,4 @@
-# Cluetivity Dashboard
+# LiveTeamGames Dashboard
 
 A modern dashboard application built with Next.js 15, React 19, and Tailwind CSS.
 

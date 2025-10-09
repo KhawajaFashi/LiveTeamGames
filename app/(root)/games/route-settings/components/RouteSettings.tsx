@@ -61,10 +61,10 @@ const RouteSettings = () => {
 
             </div>
             {/* General Section */}
-            <div className='mx-36'>
+            <div className='mx-36 max-lg:mx-2 max-lg:text-[13px]'>
                 <div className="mb-8">
                     <h2 className="text-xl font-semibold mb-4">General</h2>
-                    <div className="grid grid-cols-[1fr_3fr] gap-x-12 gap-y-6 ">
+                    <div className="grid grid-cols-[1fr_3fr] gap-x-12 gap-y-6 text-[13px]">
                         {/* <div className='flex '> */}
                         <label className="block text-gray-700 font-medium mb-1">Route Name <span className="text-red-500">*</span></label>
                         <div>
@@ -97,7 +97,7 @@ const RouteSettings = () => {
                 {/* Highscore Section */}
                 <div className="my-10">
                     <h2 className="text-lg font-semibold mb-2">Highscore</h2>
-                    <div className="grid grid-cols-[1fr_3fr] gap-x-12 gap-y-6">
+                    <div className="grid grid-cols-[1fr_3fr] gap-x-12 gap-y-6 text-[13px]">
                         {/* <div> */}
                         <label className="block text-gray-700 font-medium mb-1">Connected Highscore :</label>
                         <select className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={highscore} onChange={e => setHighscore(e.target.value)}>
@@ -140,7 +140,7 @@ const RouteSettings = () => {
                         {/* </div> */}
                         <div className="flex items-center mt-2">
                             <input type="checkbox" disabled checked={showLogo} onChange={e => setShowLogo(e.target.checked)} className="mr-2 w-4 h-4 accent-[#009FE3]" />
-                            <span className="text-gray-700">Show Cluetivity logo</span>
+                            <span className="text-gray-700">Show LiveTeamGames logo</span>
                         </div>
                     </div>
                 </div>
@@ -149,7 +149,7 @@ const RouteSettings = () => {
                     <h2 className="text-xl font-semibold mb-2">Advanced Customizations</h2>
                     <div className="border-t pt-4">
                         <h3 className="text-xl font-semibold my-3">General</h3>
-                        <div className="grid grid-cols-[1fr_3fr] gap-x-12 gap-y-4 mb-6">
+                        <div className="grid grid-cols-[1fr_3fr] max-md:grid-cols-[1fr_1fr] gap-x-12 max-md:gap-x-8 gap-y-4 mb-6">
                             <span >Background Music :</span>
                             <div className="flex items-center">
                                 <input type="checkbox" disabled checked={backgroundMusicDefault} onChange={e => setBackgroundMusicDefault(e.target.checked)} className="ml-2 w-4 h-4 accent-[#009FE3]" />
@@ -182,7 +182,7 @@ const RouteSettings = () => {
                             </div>
                         </div>
                         <h3 className="text-xl font-semibold my-4">Map</h3>
-                        <div className="grid grid-cols-[1fr_3fr] gap-x-12 gap-y-4 mb-6">
+                        <div className="grid grid-cols-[1fr_3fr] max-md:grid-cols-[1fr_1fr] gap-x-12 max-md:gap-x-8 gap-y-4 mb-6">
                             <span >Map Style :</span>
                             <div className="flex items-center">
                                 <input type="checkbox" disabled checked={mapStyleDefault} onChange={e => setMapStyleDefault(e.target.checked)} className="ml-2 w-4 h-4 accent-[#009FE3]" />
@@ -231,7 +231,6 @@ const RouteSettings = () => {
                         </div>
                         <h3 className="text-xl font-semibold my-4">Team Registration</h3>
                         <div className='grid grid-cols-[1fr_3fr] gap-x-12 gap-y-4 mb-6 '>
-
                             <span >Custom Team Icons :</span>
                             <div className="flex items-center mb-6">
                                 <input type="checkbox" disabled checked={customTeamIconsDefault} onChange={e => setCustomTeamIconsDefault(e.target.checked)} className="ml-2 w-4 h-4 accent-[#009FE3]" />

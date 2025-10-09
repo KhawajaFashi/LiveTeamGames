@@ -14,6 +14,13 @@ export default async function GamesPage({ searchParams }: GamesPageProps) {
     const gameType = params?.name || 'magic-portal';
     const gameData = getGameData(gameType);
 
+    const response = await fetch(`${process.env.API_URL}/games/fetch_data`, {
+        method: 'GET',
+    });
+
+    const data = response.json();
+    console.log(data);
+
     console.log('Game Type:', gameType);
 
     // If invalid game type, redirect to magic-portal
