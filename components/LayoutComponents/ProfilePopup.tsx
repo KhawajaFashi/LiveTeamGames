@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/axios';
 
@@ -9,9 +9,28 @@ interface ProfilePopupProps {
     buttonRef: React.RefObject<HTMLDivElement | null>;
 }
 
+type User = {
+    _id: string
+    userName: string
+    email: string
+    role: string
+}
+
 const ProfilePopup: React.FC<ProfilePopupProps> = ({ isOpen, onClose, buttonRef }) => {
     const router = useRouter();
     const popupRef = useRef<HTMLDivElement>(null);
+    const [user, setUser] = useState<User | null>(null)
+    useEffect(() => {
+        // Runs only in browser
+        const storedUser = localStorage.getItem('user')
+        if (storedUser) {
+            try {
+                setUser(JSON.parse(storedUser))
+            } catch {
+                console.error('Invalid user data in localStorage')
+            }
+        }
+    }, [])
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -41,8 +60,8 @@ const ProfilePopup: React.FC<ProfilePopupProps> = ({ isOpen, onClose, buttonRef 
             className="absolute top-16 right-6 z-50 bg-white rounded-lg shadow-lg border w-64"
         >
             <div className="bg-[#000f24] p-6 text-white">
-                <div className="font-semibold text-sm">DemoSet20</div>
-                <div className="text-xs text-gray-300">demoset20@liveteamgames.com</div>
+                <div className="font-semibold text-sm">{user?._id}</div>
+                <div className="text-xs text-gray-300">{user?.email}</div>
             </div>
 
             {/* Menu Items */}

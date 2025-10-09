@@ -320,7 +320,7 @@ const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ isSidebarOpen =
                         </i>
                     }
                     label="Help"
-                    href="https://cluetivity.zendesk.com/hc/en-us"
+                    href=""
                     isCollapsed={isCollapsed}
                 />
             </nav>

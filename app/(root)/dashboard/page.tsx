@@ -1,10 +1,13 @@
 import React from 'react';
 import BlackoutCard from '../../../components/Dashboard/BlackoutCard';
 import NewsFeedCard from '../../../components/Dashboard/NewsFeedCard';
+import SettingStorage from '@/components/LayoutComponents/SettingStorage';
 
 export default function Dashboard() {
+
     return (
         <div className="flex flex-col bg-[#f2f3f8] p-6">
+            <SettingStorage/>
             <div className='bg-white rounded-lg shadow-sm mb-6 p-5'>
                 <h1 className="text-3xl font-bold text-gray-800 ">Dashboard</h1>
             </div>

@@ -8,7 +8,8 @@ export default async function Home() {
   // if (!uid) {
   //   redirect('/login');
   // }
-  // else
-  redirect('/dashboard');
+  // else {
+    redirect('/dashboard');
+  // }
 
 }

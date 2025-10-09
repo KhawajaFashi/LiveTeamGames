@@ -10,18 +10,6 @@ export interface TeamData {
     lng: number;
 }
 
-export interface TeamData {
-    no: number;
-    teamName: string;
-    score: string;
-    status: 'WON' | 'LEFT';
-    timeLeft: string;
-    battery: string;
-    startedOn: string;
-    lat: number;
-    lng: number;
-}
-
 export interface OperatorData {
     name: string;
     title: string;

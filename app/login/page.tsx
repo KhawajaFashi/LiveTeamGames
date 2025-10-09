@@ -19,8 +19,10 @@ export default function LoginPage() {
                 email,
                 password,
             });
+            console.log("Response",response.status === 200);
             if (response.status === 200) {
                 router.push('/dashboard');
+                console.log(router)
             } else {
                 setError('Incorrect email or password');
             }

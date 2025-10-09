@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import HighscoreActionsMenu from "../components/Highscore/HighscoreActionsMenu";
 import HighscoreShow from "../components/Highscore/HighscoreShow";
 import HighscoreEditName from "../components/Highscore/HighscoreEditName";
@@ -51,6 +51,9 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreData }) => {
         { no: 5, teamName: "Dudes", routeName: "DR6", score: 8100, status: "PLAYING", time: "73 h 11 m", startedOn: "01.10.2025" },
         { no: 5, teamName: "Dudes", routeName: "DR6", score: 8100, status: "PLAYING", time: "73 h 11 m", startedOn: "01.10.2025" },
     ];
+    useEffect(() => {
+        setLiveHighscores(highScoreData?.rows ?? []);
+    }, [highScoreData?.rows]);
     {/* Live Highscore Section */ }
     return (
         <div>

@@ -1,10 +1,11 @@
 "use client";
 import api from "@/utils/axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const steps = ["Profile", "Settings", "Team Photos"];
 
 const MyProfile: React.FC = () => {
+    const [user, setUser] = useState<any>(null);
     const [step, setStep] = useState(0);
     // Step 0: Passwords
     const [userName, setUserName] = useState('');
@@ -38,8 +39,13 @@ const MyProfile: React.FC = () => {
     // Design of team photos
     const [addCompanyLogo, setAddCompanyLogo] = useState(false);
 
-    // const token = localStorage.getItem('uid');
-
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    },[])
+    console.log(user);
     
     // Save handler
     const handleSave = async () => {

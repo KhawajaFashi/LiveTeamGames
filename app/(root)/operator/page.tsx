@@ -15,8 +15,9 @@ export default async function GamesPage({ searchParams }: GamesPageProps) {
     const OperatorData = getOperatorData(operatorType);
 
     // If invalid game type, redirect to magic-portal
+    // console.log("Operator Data:", OperatorData);
     if (!OperatorData) {
-        redirect('/operator?name=game2');
+        redirect('/operator?name=game1');
     }
 
 
