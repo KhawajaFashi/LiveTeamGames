@@ -5,10 +5,10 @@ export default async function Home() {
   const cookieStore = await cookies();
   const uid = cookieStore.get('uid');
 
-  if (!uid) {
-    redirect('/login');
-  }
-  else
-    redirect('/dashboard');
+  // if (!uid) {
+  //   redirect('/login');
+  // }
+  // else
+  redirect('/dashboard');
 
 }
