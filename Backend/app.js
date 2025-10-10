@@ -24,7 +24,7 @@ app.use(express.json());
 // app.use(cors());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-const allowed = ['http://localhost:3000', 'https://liveteamgames.netlify.app/', 'https://live-team-games.vercel.app/'];
+const allowed = ['http://localhost:3000', 'https://liveteamgames.netlify.app', 'https://live-team-games.vercel.app'];
 
 app.use(cors({
     origin: (origin, callback) => {
