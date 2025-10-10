@@ -55,7 +55,7 @@ const OperatorTable: React.FC<OperatorTableProps> = ({ OperatorData }) => {
     const [deleteConfirmText, setDeleteConfirmText] = useState("");
     const [showAnimateShowdown, setShowAnimateShowdown] = useState(false);
 
-    console.log(OperatorData,"Refreshed");
+    console.log(OperatorData, "Refreshed");
 
 
     // Show TeamDetailsTable or TeamDetailsPhotos or TeamDetailsVideos if requested
@@ -102,7 +102,7 @@ const OperatorTable: React.FC<OperatorTableProps> = ({ OperatorData }) => {
     }
     useEffect(() => {
         setTeamsState(OperatorData?.teams ?? []);
-    }, [OperatorData.teams]);
+    }, [OperatorData?.teams]);
 
     // Fix: Only show detailsContent if not null, else show main table UI
     if (detailsContent !== null) {
