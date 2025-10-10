@@ -21,8 +21,8 @@ async function handleUserLogin(req, res) {
         }
         res.cookie("uid", token, {
             httpOnly: true,
-            sameSite: "lax", // or "none" if using https
-            secure: false,   // true if https
+            sameSite: "none", // or "none" if using https
+            secure: true,   // true if https
         })
         // console.log("Token generated:", token);
         const user = getUser(token);
