@@ -107,6 +107,7 @@ async function uploadData(req, res) {
 
 
 async function fetchUserProfile(req, res) {
+    console.log("Inside fetchUserProfile", req.body, req.cookies);
     const userId = req.user ? req.user._id : null;
     try {
         const user = await User.findById(userId);
