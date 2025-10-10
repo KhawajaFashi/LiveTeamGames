@@ -16,9 +16,6 @@ const userSchema = new Schema({
         type: String,
         required: true,
     },
-    salt: {
-        type: String,
-    },
     role: {
         type: String,
         enum: ["USER", "ADMIN"],
@@ -67,11 +64,11 @@ const userSchema = new Schema({
     },
     media: [
         {
-            folderName: { type: String, required: true },
+            folderName: { type: String },
             images: [
                 {
-                    name: { type: String, required: true },
-                    path: { type: String, required: true },
+                    name: { type: String },
+                    path: { type: String },
                 },
             ],
         },
@@ -80,32 +77,19 @@ const userSchema = new Schema({
 }, { timestamps: true });
 
 
-userSchema.pre("save", function (next) {
-    const user = this;
-    if (!user.isModified("password"))
-        return;
+// userSchema.static('matchPasswordAndGenerateToken', async function (email, password) {
+//     const user = await this.findOne({ email });
+//     if (!user) throw new Error("User not found!");
+//     console.log(password);
+//     const salt = user.salt;
+//     const hashedPassword = user.password;
 
-    const salt = crypto.randomBytes(16).toString("hex");
+//     const userhashedPassword = crypto.createHmac("sha256", salt).update(password).digest("hex");
 
-    const hashedPassword = crypto.createHmac("sha256", salt).update(user.password).digest("hex");
-    user.password = hashedPassword;
-    user.salt = salt;
-
-    next();
-});
-
-userSchema.static('matchPasswordAndGenerateToken', async function (email, password) {
-    const user = await this.findOne({ email });
-    if (!user) throw new Error("User not found!");
-    const salt = user.salt;
-    const hashedPassword = user.password;
-
-    const userhashedPassword = crypto.createHmac("sha256", salt).update(password).digest("hex");
-
-    if (userhashedPassword !== hashedPassword) throw new Error("Invalid password!");
-    const token = generateToken(user);
-    return token;
-})
+//     if (userhashedPassword !== hashedPassword) return null;
+//     const token = generateToken(user);
+//     return token;
+// })
 
 const User = model("User", userSchema);
 

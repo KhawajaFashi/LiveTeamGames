@@ -55,7 +55,7 @@ const OperatorTable: React.FC<OperatorTableProps> = ({ OperatorData }) => {
     const [deleteConfirmText, setDeleteConfirmText] = useState("");
     const [showAnimateShowdown, setShowAnimateShowdown] = useState(false);
 
-    // console.log(OperatorData,"Refreshed");
+    console.log(OperatorData,"Refreshed");
 
 
     // Show TeamDetailsTable or TeamDetailsPhotos or TeamDetailsVideos if requested
@@ -102,7 +102,7 @@ const OperatorTable: React.FC<OperatorTableProps> = ({ OperatorData }) => {
     }
     useEffect(() => {
         setTeamsState(OperatorData?.teams ?? []);
-    }, [OperatorData?.teams]);
+    }, [OperatorData.teams]);
 
     // Fix: Only show detailsContent if not null, else show main table UI
     if (detailsContent !== null) {
@@ -124,7 +124,7 @@ const OperatorTable: React.FC<OperatorTableProps> = ({ OperatorData }) => {
                         </button>
                         <div className="flex flex-col items-center">
                             <div className="text-red-500 text-5xl mb-2">&#33;</div>
-                            <h2 className="text-lg font-semibold mb-2">Delete {teams[showTeamDetailsIdx]?.teamName}</h2>
+                            <h2 className="text-lg font-semibold mb-2">Delete {teams[showTeamDetailsIdx].teamName}</h2>
                             <label className="mb-4 text-center">Type <span className="font-bold">DELETE</span> to confirm</label>
                             <input
                                 type="text"

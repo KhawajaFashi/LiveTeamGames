@@ -1,6 +1,10 @@
 import mongoose, { Schema, model } from "mongoose";
 
-const highScoreSchema = new Schema({
+const templateSchema = new Schema({
+    id: {
+        type: Number,
+        required: true,
+    },
     gameName: {
         type: String,
         required: true,
@@ -9,14 +13,14 @@ const highScoreSchema = new Schema({
         type: String,
         required: true,
     },
-    saved: {
+    description: {
         type: Boolean,
         required: true,
     },
-    teams: [
+    riddles: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "team",
+            ref: "riddle",
         },
     ],
 
@@ -24,6 +28,6 @@ const highScoreSchema = new Schema({
 
 
 
-const highScore = model("highScore", highScoreSchema);
+const routeTemplate = model("routeTemplate", templateSchema);
 
-export default highScore;
+export default routeTemplate;

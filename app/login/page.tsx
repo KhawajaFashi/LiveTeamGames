@@ -19,8 +19,10 @@ export default function LoginPage() {
                 email,
                 password,
             });
-            console.log("Response",response.status === 200);
+            console.log("Response", response.status === 200);
             if (response.status === 200) {
+                document.cookie = `uid=${response.data.token}; path=/;`;
+                console.log(response.data.token)
                 router.push('/dashboard');
                 console.log(router)
             } else {

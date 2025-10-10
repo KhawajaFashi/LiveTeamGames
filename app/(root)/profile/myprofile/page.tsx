@@ -1,11 +1,18 @@
 "use client";
 import api from "@/utils/axios";
+import { AxiosError } from "axios";
 import React, { useEffect, useState } from "react";
 
 const steps = ["Profile", "Settings", "Team Photos"];
 
+type User = {
+    _id: string
+    userName: string
+    email: string
+    role: string
+}
+
 const MyProfile: React.FC = () => {
-    const [user, setUser] = useState<any>(null);
     const [step, setStep] = useState(0);
     // Step 0: Passwords
     const [userName, setUserName] = useState('');
@@ -20,16 +27,16 @@ const MyProfile: React.FC = () => {
     const [credits, setCredits] = useState('123456789');
     const [storage, setStorage] = useState<{
         size: string;
-        unit: string;
+        sizeUnit: string;
     }>({
         size: '8.58',
-        unit: 'MB'
+        sizeUnit: 'MB'
     });
     // Step 2: Email
     const [senderEmailName, setSenderEmailName] = useState('');
     const [replyEmail, setReplyEmail] = useState('');
     const [emailSubject, setEmailSubject] = useState('');
-    const [emailContent, setEmailContent] = useState(`Hello {PLAYERNAME}!\nYou and your team **{TEAMNAME}** achieved **{SCORE}** in your previous adventure!`);
+    const [emailContent, setEmailContent] = useState(``);
     const [emailLang, setEmailLang] = useState('english');
     // Privacy Policy
     const [companyName, setCompanyName] = useState('');
@@ -38,15 +45,52 @@ const MyProfile: React.FC = () => {
     const [errors, setErrors] = useState<any>({});
     // Design of team photos
     const [addCompanyLogo, setAddCompanyLogo] = useState(false);
+    const [addGameLogo, setAddGameLogo] = useState(false);
+    const [addPlayingTime, setAddPlayingTime] = useState(false);
+    const [addScore, setAddScore] = useState(false);
+    const [addTeamName, setAddTeamName] = useState(false);
+    const [addOverlayFrame, setAddOverlayFrame] = useState(false);
 
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
+        // Runs only in browser
+        const storedUser = localStorage.getItem('user')
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            try {
+                setUser(JSON.parse(storedUser))
+            } catch {
+                console.error('Invalid user data in localStorage')
+            }
         }
-    },[])
-    console.log(user);
-    
+
+        // Fetch profile data from backend
+        const fetch_data = async () => {
+            try {
+                const res = await api.get('/user/fetch_profile');
+                if (res.status === 200) {
+                    console.log("Profile data", res.data)
+                    setUserName(res.data.user.userName || '');
+                    setEmail(res.data.user.email || '');
+                    setUserComapny(res.data.user.companyName || '');
+                    setCredits(res.data.user.credits || '');
+                    setAdminCode(res.data.user.adminCode || '');
+                    setStorage(res.data.user.storageUsed || { size: '0', unit: 'MB' });
+                    setAddCompanyLogo(res.data.user.addCompanyLogo || false);
+                    setAddGameLogo(res.data.user.addGameLogo || false);
+                    setAddPlayingTime(res.data.user.addPlayingTime || false);
+                    setAddScore(res.data.user.addScore || false);
+                    setAddTeamName(res.data.user.addTeamName || false);
+                    setAddOverlayFrame(res.data.user.addOverlayFrame || false);
+                }
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetch_data();
+    }, [])
+
+
     // Save handler
     const handleSave = async () => {
         let newErrors: any = {};
@@ -81,35 +125,58 @@ const MyProfile: React.FC = () => {
                 userName,
                 email,
                 userComapny,
-                oldPassword,
+                password: oldPassword,
                 newPassword,
-                repeatPassword,
                 language,
                 adminCode,
                 credits,
                 storage,
+                companyName,
+                addGameLogo,
+                addPlayingTime,
+                addScore,
+                addTeamName,
+                addOverlayFrame,
+                privacyPolicy,
+                addCompanyLogo
+            };
+            const emailData = {
                 senderEmailName,
                 replyEmail,
                 emailSubject,
                 emailContent,
                 emailLang,
-                companyName,
-                privacyPolicy,
-                addCompanyLogo
             };
-            const response = await api.post('/profile/update_profile', profileData);
+            const response = await api.post(`/user/${emailAllFilled ? 'update_profile_with_email' : 'update_profile'}`, { ...profileData, ...(emailAllFilled ? emailData : {}), });
             if (response.status === 200) {
                 console.log('Saved!', response.data.message);
             }
             // alert('Saved!');
-        } catch (err) {
-            setErrors({ submit: 'Failed to save. Try again.' });
-            console.log("Failed", err);
+        } catch (err: unknown) {
+            const error = err as AxiosError<{
+                message: string;
+            }>; // tell TS what response.data looks like
+
+            if (error.response?.status === 404) {
+                console.log(error.response.data);
+                setErrors({ submit: error.response?.data.message });
+            } else {
+                setErrors({ submit: 'Failed to save. Try again.' });
+                console.error("Failed", err);
+            }
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-full w-full">
+                <span className="text-gray-500 text-lg">Loading profile...</span>
+            </div>
+        );
+    }
+
     return (
-        <div className={`m-6 bg-white rounded-lg shadow-sm mt-8 ${step == 2 ? 'h-full' : ' h-[83vh]'} flex flex-col justify-between`}>
+        <div className={`m-6 bg-white rounded-lg shadow-sm mt-8 ${step == 2 ? 'h-full' : ' h-[83vh]'} flex flex-col justify-between h-full`}>
             <div>
                 <div className="flex gap-8 mb-8 border-b border-gray-200 pb-0 p-6">
                     {steps.map((label, idx) => (
@@ -127,9 +194,9 @@ const MyProfile: React.FC = () => {
                         <label className="font-normal text-right self-center">User Name</label>
                         <input value={userName} readOnly className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" />
                         <label className="font-normal text-right self-center">E-Mail</label>
-                        <input type="email" readOnly className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" defaultValue={email} />
+                        <input type="email" readOnly className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={email} />
                         <label className="font-normal text-right self-center">Company Name</label>
-                        <input type="text" readOnly className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" defaultValue={userComapny} />
+                        <input type="text" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={userComapny} onChange={e => setUserComapny(e.target.value)} />
                         <label className="font-normal text-right self-center">Old Password</label>
                         <input type="password" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={oldPassword} onChange={e => setOldPassword(e.target.value)} />
                         <label className="font-normal text-right self-center">New Password</label>
@@ -143,7 +210,7 @@ const MyProfile: React.FC = () => {
                                     const { password, ...rest } = prev;
                                     return rest;
                                 });
-                                setRepeatPassword(e.target.value);
+                            setRepeatPassword(e.target.value);
                         }} />
                         {errors.password && <div className="col-span-2 text-red-600 text-xs">{errors.password}</div>}
                     </form>
@@ -159,7 +226,7 @@ const MyProfile: React.FC = () => {
                         <input type="text" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={adminCode} onChange={e => setAdminCode(e.target.value)} />
                         {errors.adminCode && <div className="col-span-2 text-red-600 text-xs">{errors.adminCode}</div>}
                         <label className="font-normal text-right self-center">Storage Used</label>
-                        <input type="text" readOnly className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={`${storage.size} ${storage.unit}/15 GB`} />
+                        <input type="text" readOnly className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={`${storage.size} ${storage.sizeUnit}/15 GB`} />
                         <label className="font-normal text-right self-center">LiveTeamGames Credits</label>
                         <input type="text" readOnly className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={`${credits}`} />
                     </form>
@@ -232,15 +299,15 @@ const MyProfile: React.FC = () => {
                             <label className="font-normal text-left self-center">Add Company Logo:</label>
                             <input type="checkbox" className="accent-[#E60050] w-5 h-5" checked={addCompanyLogo} onChange={e => setAddCompanyLogo(e.target.checked)} />
                             <label className="font-normal text-left self-center">Add Game Logo:</label>
-                            <input type="checkbox" className="accent-[#E60050] w-5 h-5" checked readOnly />
+                            <input type="checkbox" className="accent-[#E60050] w-5 h-5" checked={addGameLogo} onChange={e => setAddGameLogo(e.target.checked)} />
                             <label className="font-normal text-left self-center">Add Playing Time:</label>
-                            <input type="checkbox" className="accent-[#E60050] w-5 h-5" checked readOnly />
+                            <input type="checkbox" className="accent-[#E60050] w-5 h-5" checked={addPlayingTime} onChange={e => setAddPlayingTime(e.target.checked)} />
                             <label className="font-normal text-left self-center">Add Score:</label>
-                            <input type="checkbox" className="accent-[#E60050] w-5 h-5" checked readOnly />
+                            <input type="checkbox" className="accent-[#E60050] w-5 h-5" checked={addScore} onChange={e => setAddScore(e.target.checked)} />
                             <label className="font-normal text-left self-center">Add Team Name:</label>
-                            <input type="checkbox" className="accent-[#E60050] w-5 h-5" checked readOnly />
+                            <input type="checkbox" className="accent-[#E60050] w-5 h-5" checked={addTeamName} onChange={e => setAddTeamName(e.target.checked)} />
                             <label className="font-normal text-left self-center">Add Overlay Frame:</label>
-                            <input type="checkbox" className="accent-[#E60050] w-5 h-5" checked readOnly />
+                            <input type="checkbox" className="accent-[#E60050] w-5 h-5" checked={addOverlayFrame} onChange={e => setAddOverlayFrame(e.target.checked)} />
                         </form>
                         <hr className="mb-8 text-gray-200" />
                         <h3 className="font-semibold text-lg mb-6">Privacy Policy</h3>

@@ -25,10 +25,12 @@ const validateToken = (token) => {
 
 function getUser(token) {
     try {
+        // console.log("Decoding token:", token);
         return jwt.verify(token, secret);
     } catch (e) {
         return null;
     }
 }
+
 
 export { generateToken, validateToken, getUser };
