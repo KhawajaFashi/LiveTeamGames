@@ -43,7 +43,9 @@ async function handleUserLogout(req, res) {
     res.status(200).json({ message: 'Logged out' });
 }
 
+
 async function verify_login(req, res) {
+    console.log("Inside verify_login", req.user, req.body);
     if (req.user) {
         const token = req.body.token;
         if (!token) {
@@ -51,7 +53,7 @@ async function verify_login(req, res) {
         }
         else {
             const verifiedUser = getUser(token);
-            // console.log("Why in verify_login", JSON.stringify(verifiedUser), JSON.stringify(req.user), JSON.stringify(req.user) === JSON.stringify(verifiedUser));
+            console.log("Why in verify_login", JSON.stringify(verifiedUser), JSON.stringify(req.user), JSON.stringify(req.user) === JSON.stringify(verifiedUser));
             if (JSON.stringify(req.user) === JSON.stringify(verifiedUser))
                 res.status(200).json({ message: "User is logged in", valid: true, user: req.user });
             else
@@ -110,7 +112,7 @@ async function fetchUserProfile(req, res) {
         const user = await User.findById(userId);
         console.log("User found for update:", user, req.user);
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(403).json({ message: "User not found" });
         }
         res.status(200).json({ message: "Profile fetched successfully", user: user });
 

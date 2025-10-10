@@ -24,18 +24,28 @@ app.use(express.json());
 // app.use(cors());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-const allowed = ['http://localhost:3000', 'https://liveteamgames.netlify.app', 'https://live-team-games.vercel.app'];
 
-app.use(cors({
-    origin: (origin, callback) => {
-        // allow requests with no origin (like mobile apps or curl)
-        if (!origin) return callback(null, true);
-        if (allowed.includes(origin)) return callback(null, true);
-        callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,                // allow cookies to be sent
-}));
 
+const allowed = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://liveteamgames.netlify.app',
+    'https://live-team-games.vercel.app'
+];
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin || allowed.includes(origin)) {
+                callback(null, true);
+            } else {
+                console.log('Blocked by CORS:', origin);
+                callback(null, false); // instead of throwing an error
+            }
+        },
+        credentials: true,
+    })
+);
 
 // Routes
 app.use('/user', checkAuth, userRouter);
