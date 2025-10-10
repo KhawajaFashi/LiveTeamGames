@@ -21,7 +21,9 @@ async function checkAuth(req, res, next) {
 
     // console.log('Cookie received:', req.cookies);
     // console.log(JSON.stringify(req, null, 2));
-    console.log(`User UID from cookie in checkAuth middleware: ${userUid}, ${req.body} ${req.cookies}`);
+    console.log(`User from checkAuth middleware: ${user} `);
+    console.log(`Req body from middleware: ${req.body} `);
+    console.log(`Req cookies from middleware: ${req.cookies} `);
 
     const user = getUser(userUid);
     
