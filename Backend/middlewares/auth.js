@@ -17,11 +17,17 @@ import { getUser } from "../service/auth.js";
 // }
 
 async function checkAuth(req, res, next) {
-    const userUid = req.cookies?.uid || req.body?.token || req.headers?.authorization?.split(" ")[1];
+    const userUid =
+        req.cookies?.uid ||
+        req.body?.token ||
+        (req.headers?.authorization?.startsWith("Bearer ")
+            ? req.headers.authorization.split(" ")[1]
+            : req.headers?.authorization);
+
+    console.log(`User from checkAuth middleware: ${userUid}`);
 
     // console.log('Cookie received:', req.cookies);
     // console.log(JSON.stringify(req, null, 2));
-    // console.log(`User from checkAuth middleware: ${user} `);
     console.log(`Req body from middleware: ${req.body} `);
     // console.log(`Req cookies from middleware: ${req.cookies} `);
 
