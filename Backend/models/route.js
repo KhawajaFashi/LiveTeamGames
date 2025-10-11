@@ -45,7 +45,7 @@ const MapSchema = new Schema({
 
 const RouteSchema = new Schema({
     name: { type: String, required: true },
-    riddle: [{ type: Schema.Types.ObjectId, ref: "Riddle" }],
+    riddle: [{ type: Schema.Types.ObjectId, ref: "riddle" }],
     lang: { type: String, default: "EN" },
     active: { type: Boolean },
     favourite: { type: Boolean, default: false },

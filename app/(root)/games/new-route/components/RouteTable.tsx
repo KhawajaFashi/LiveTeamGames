@@ -11,6 +11,7 @@ import { PiGearBold } from 'react-icons/pi';
 
 import axios from 'axios';
 import { useEffect } from 'react';
+import api from '@/utils/axios';
 
 interface RouteTableProps {
     gameID: string;
@@ -39,10 +40,11 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
         async function fetchRiddles() {
             try {
                 if (!routeID) return;
-                const res = await axios.get(`/games/fetch_route_riddles?routeName=${encodeURIComponent(routeID)}`);
-                if (Array.isArray(res.data)) {
+                const res = await api.get(`/games/fetch_route_riddles?routeName=${encodeURIComponent(routeID)}`);
+                if (res.data.success) {
+                    // console.log(res.data.data)
                     // Add fallback for missing fields and number them
-                    setRiddles(res.data.map((riddle: any, idx: number) => ({
+                    setRiddles(res.data.data.map((riddle: any, idx: number) => ({
                         no: idx + 1,
                         name: riddle.name || riddle.riddleName || 'Unnamed Riddle',
                         episode: riddle.episode || '-',

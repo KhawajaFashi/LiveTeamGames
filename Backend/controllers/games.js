@@ -4,15 +4,14 @@ import riddle from "../models/riddle.js";
 export const fetchRouteRiddles = async (req, res) => {
     try {
         const { routeName } = req.query;
-        console.log("Found route:", routeName);
         if (!routeName) {
             return res.status(400).json({
                 success: false,
                 message: "routeName query parameter is required"
             });
         }
-        const foundRoute = await route.findOne({ routeName }).populate('riddles');
-
+        const foundRoute = await route.findOne({ name: routeName }).populate('riddle');
+        
         if (!foundRoute) {
             return res.status(404).json({
                 success: false,
@@ -21,6 +20,7 @@ export const fetchRouteRiddles = async (req, res) => {
         }
 
         const riddlesList = foundRoute.riddle || [];
+        // console.log("Found route:", riddlesList);
 
         res.status(200).json({
             success: true,
