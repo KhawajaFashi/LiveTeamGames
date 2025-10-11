@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from 'react';
 import { StepProps } from '../types';
-import { TemplateTable, templateArray, TemplateDetail, Template } from '@/lib/routeTemplates';
 import RouteTemplateSelect from './RouteTemplateSelect';
 import RouteSharedInput from './RouteSharedInput';
+import api from '@/utils/axios';
 
 const RouteSteps: React.FC<StepProps> = ({ step, totalSteps, routeType, gameId, onNext, onBack, onCancel }) => {
     const [shareCode, setShareCode] = useState('');
@@ -18,7 +18,7 @@ const RouteSteps: React.FC<StepProps> = ({ step, totalSteps, routeType, gameId, 
     }>({});
 
     const [showPopup, setShowPopup] = useState(false);
-    const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+    const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
 
     // Simple submit handlers for demo—replace with real API calls
     const validateCurrent = () => {
@@ -46,7 +46,7 @@ const RouteSteps: React.FC<StepProps> = ({ step, totalSteps, routeType, gameId, 
         return Object.keys(nextErrors).length === 0;
     };
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
         const ok = validateCurrent();
         if (!ok) return;
 
@@ -56,13 +56,44 @@ const RouteSteps: React.FC<StepProps> = ({ step, totalSteps, routeType, gameId, 
             return onNext();
         }
 
-        // final submit - for now navigate back or log
-        console.log({ gameId, routeType, routeName, templateId, shareCode });
-        onCancel();
+        // In the final step, post data to /games/add_route
+        try {
+            const routeData = {
+                gameName: gameId,
+                name: routeName,
+                playingTime: parseInt(playingTime) || 0,
+                templateId: templateId,
+                routeType: routeType,
+                shareCode: shareCode,
+                ...(selectedTemplate && {
+                    description: selectedTemplate.description,
+                    riddles: selectedTemplate.riddles?.map((r: any) => r._id) || []
+                })
+            };
+
+            const response = await api.post('/games/add_route', routeData);
+
+            const data = response.data;
+
+            if (data.success) {
+                // Show success message or redirect
+                console.log('Route created successfully', data.data, data.adminCode, data.cheatCode);
+                onCancel(); // Close the form after successful submission
+            } else {
+                // Show error in the form
+                setErrors({
+                    routeName: data.message || 'Failed to create route'
+                });
+            }
+        } catch (error) {
+            setErrors({
+                routeName: 'Failed to create route. Please try again.'
+            });
+        }
+
     };
 
-    // Get details for selected template
-    const templateDetails: TemplateDetail[] = selectedTemplate ? TemplateTable[selectedTemplate] || [] : [];
+
 
     return (
         <div className="mt-6">
@@ -76,6 +107,7 @@ const RouteSteps: React.FC<StepProps> = ({ step, totalSteps, routeType, gameId, 
                             setErrors={setErrors}
                             setSelectedTemplate={setSelectedTemplate}
                             setShowPopup={setShowPopup}
+                            gameName={gameId}
                         />
                     )}
                     {routeType === 'shared' && (
@@ -156,25 +188,36 @@ const RouteSteps: React.FC<StepProps> = ({ step, totalSteps, routeType, gameId, 
             {showPopup && selectedTemplate && (
                 <div className="fixed inset-0 bg-[rgba(0,0,0,0.7)] flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded shadow-lg max-w-lg w-full mx-4">
-                        <h3 className="text-lg font-bold mb-4">{templateArray.find((t: Template) => t.id === selectedTemplate)?.title || 'Template Details'}</h3>
-                        <table className="w-full text-sm">
-                            <thead className="bg-[#000f24] text-white">
-                                <tr>
-                                    <th className='px-2 py-3 text-center text-sm font-medium'>Stage</th>
-                                    <th className='px-2 py-3 text-center text-sm font-medium'>Type</th>
-                                    <th className='px-2 py-3 text-center text-sm font-medium'>Name</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {templateDetails.map((row, idx) => (
-                                    <tr key={idx}>
-                                        <td className="p-2 text-center">{row.stage}</td>
-                                        <td className="p-2 text-center">{row.type}</td>
-                                        <td className="p-2 text-center">{row.name}</td>
+                        <h3 className="text-lg font-bold mb-4 border-b border-gray-200 p-5 pl-0 pt-0">{selectedTemplate.id}. {selectedTemplate.name || 'Template Details'}</h3>
+                        {selectedTemplate.riddles && selectedTemplate.riddles.length > 0 ? (
+                            <table className="w-full text-sm">
+                                <thead className="bg-[#000f24] text-white">
+                                    <tr>
+                                        <th className='px-2 py-3 text-center text-sm font-medium'>Stage</th>
+                                        <th className='px-2 py-3 text-center text-sm font-medium'>Type</th>
+                                        <th className='px-2 py-3 text-center text-sm font-medium'>Name</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {selectedTemplate.riddles.map((r: any, idx: number) => (
+                                        <tr key={r._id || idx}>
+                                            <td className="p-2 text-center">{r.episode}</td>
+                                            <td className="p-2 text-center">{
+                                                r.type === 'Augmented Reality' ? 'AR' :
+                                                    r.type === 'Location Based Riddle' ? 'LBR' :
+                                                        r.type === 'Multiple Choice' ? 'MC' :
+                                                            r.type === 'Action Pack' ? 'AP' :
+                                                                r.type === 'Mini Game' ? 'MG' :
+                                                                    r.type
+                                            }</td>
+                                            <td className="p-2 text-center">{r.name}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <div className="text-gray-500">No riddles in this template.</div>
+                        )}
                         <div className="flex justify-end mt-4">
                             <button onClick={() => setShowPopup(false)} className="px-4 py-2 bg-sky-500 text-white rounded">Close</button>
                         </div>

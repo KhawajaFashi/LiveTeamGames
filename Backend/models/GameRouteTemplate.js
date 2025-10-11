@@ -14,7 +14,7 @@ const templateSchema = new Schema({
         required: true,
     },
     description: {
-        type: Boolean,
+        type: String,
         required: true,
     },
     riddles: [

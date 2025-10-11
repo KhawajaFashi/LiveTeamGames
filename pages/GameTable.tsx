@@ -1,9 +1,10 @@
 "use client";
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { GameData } from '../lib/gameConfig';
 import FilterPopup from '@/components/GameFilterPopup';
 import Link from 'next/link';
 import RouteActionsMenu from '@/components/OperatorComponents/RouteActionsMenu';
+import api from '@/utils/axios';
 
 interface GameTableProps {
     gameData: GameData;
@@ -13,11 +14,41 @@ interface GameTableProps {
 const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const filterButtonRef = useRef<HTMLDivElement | null>(null);
-    const [checkedItems, setCheckedItems] = useState<boolean[]>(
-        Array(gameData?.rows?.length || 0).fill(false)
-    );
+    const [checkedItems, setCheckedItems] = useState<boolean[]>([]);
     const [favourites, setFavourites] = useState<boolean[]>([]);
+    const [rows, setRows] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [menuOpenIdx, setMenuOpenIdx] = useState<number | null>(null);
 
+    useEffect(() => {
+        const fetch_data = async () => {
+            setLoading(true);
+            setError(null);
+            await api.get(`/games/fetch_data?gameName=${encodeURIComponent(gameType)}`)
+                .then(res => {
+                    if (res.data.success && Array.isArray(res.data.data)) {
+                        const mappedRows = res.data.data.map((route: any) => ({
+                            name: route.name || '-',
+                            count: route.numberOfItems ?? '-',
+                            lang: route.lang || '-',
+                            status: route.active === true ? 'green' : (route.active === false ? 'red' : 'yellow'),
+                            lastEdited: route.updatedAt ? new Date(route.updatedAt).toLocaleString() : '-',
+                            _id: route._id,
+                            riddles: route.riddle ? (Array.isArray(route.riddle) ? route.riddle : [route.riddle]) : [],
+                        }));
+                        setRows(mappedRows);
+                        setCheckedItems(Array(mappedRows.length).fill(false));
+                        setFavourites(Array(mappedRows.length).fill(false));
+                    } else {
+                        setRows([]);
+                    }
+                })
+                .catch(() => setError('Failed to fetch routes'))
+                .finally(() => setLoading(false));
+        };
+        fetch_data();
+    }, [gameType]);
 
     const handleCheckboxChange = (index: number) => {
         setCheckedItems((prev) => {
@@ -27,8 +58,8 @@ const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
         });
     };
 
-
-    const [menuOpenIdx, setMenuOpenIdx] = useState<number | null>(null);
+    // Helper for riddles table (for RouteTable)
+    // You can pass rows[index].riddles to RouteTable as needed
 
     return (
         <div className="bg-white shadow-sm flex flex-col w-full">
@@ -114,21 +145,27 @@ const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
 
                     {/* Table Body */}
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {gameData?.rows?.map((row, index) => (
+                        {loading ? (
+                            <tr><td colSpan={7} className="text-center py-8">Loading...</td></tr>
+                        ) : error ? (
+                            <tr><td colSpan={7} className="text-center text-red-600 py-8">{error}</td></tr>
+                        ) : rows.length === 0 ? (
+                            <tr><td colSpan={7} className="text-center py-8">No routes found.</td></tr>
+                        ) : rows.map((row, index) => (
                             <tr key={index} className="hover:bg-gray-50">
                                 <td className="px-6 py-2" onClick={() =>
                                     setFavourites((prev) => {
-                                    const updated = [...prev];
-                                    updated[index] = !updated[index];
-                                    return updated;
-                                })}>
+                                        const updated = [...prev];
+                                        updated[index] = !updated[index];
+                                        return updated;
+                                    })}>
                                     <svg className={`w-4 h-4 ${favourites[index] === true ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                     </svg>
                                 </td>
-                                <td className="px-6 py-2 text-sm text-gray-900">{row.name}</td>
-                                <td className="px-10 py-2 text-sm text-blue-600 font-medium">{row.count}</td>
-                                <td className="px-6 py-2 text-sm text-blue-600 font-medium">{row.lang}</td>
+                                <td className="px-6 py-2 text-sm text-gray-900">{row.name ?? '-'}</td>
+                                <td className="px-10 py-2 text-sm text-blue-600 font-medium">{row.count ?? '-'}</td>
+                                <td className="px-6 py-2 text-sm text-blue-600 font-medium">{row.lang ?? '-'}</td>
                                 <td className="px-10 py-2">
                                     <input
                                         type="checkbox"
@@ -138,7 +175,7 @@ const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
                                     />
                                 </td>
 
-                                <td className="px-6 py-2 text-sm text-gray-900">{row.lastEdited}</td>
+                                <td className="px-6 py-2 text-sm text-gray-900">{row.lastEdited ?? '-'}</td>
                                 <td className="px-6 py-2 relative">
                                     <RouteActionsMenu
                                         open={menuOpenIdx === index}
@@ -146,6 +183,7 @@ const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
                                         onClose={() => setMenuOpenIdx(null)}
                                         gameID={gameType}
                                         routeID={row.name}
+                                        // riddles={row.riddles}
                                     />
                                 </td>
                             </tr>

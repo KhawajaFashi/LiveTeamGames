@@ -8,17 +8,9 @@ import BackButton from './BackButton';
 import { FaGear } from 'react-icons/fa6';
 import { PiGearBold } from 'react-icons/pi';
 
-// Example riddle data
-const initialRiddles = [
-    { no: 1, name: 'The Professor', episode: 1, type: 'AR Professor' },
-    { no: 2, name: 'Hidden Location', episode: 2, type: 'LB Photo Quest' },
-    { no: 3, name: 'Sea Letter', episode: 3, type: 'AP Bottle Message (Letter)' },
-    { no: 4, name: "The Kraken's Secret", episode: 4, type: 'AR Chest (Octopus)' },
-    { no: 5, name: 'Color Clues', episode: 5, type: 'MG Team Photo (Colors)' },
-    { no: 6, name: 'The Forgotten Map', episode: 6, type: 'AR LBR Treasure Map' },
-    { no: 7, name: 'The Lost Treasure', episode: 7, type: 'AP Final Treasure' },
-    { no: 8, name: 'Proof of Legends', episode: 8, type: 'MG Team Photo (Final)' },
-];
+
+import axios from 'axios';
+import { useEffect } from 'react';
 
 interface RouteTableProps {
     gameID: string;
@@ -40,7 +32,32 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
     const [menuOpenIdx, setMenuOpenIdx] = useState<number | null>(null);
     const router = useRouter();
     // Riddle table state
-    const [riddles, setRiddles] = useState(initialRiddles);
+    const [riddles, setRiddles] = useState<any[]>([]);
+
+    // Fetch riddles for this route from backend
+    useEffect(() => {
+        async function fetchRiddles() {
+            try {
+                if (!routeID) return;
+                const res = await axios.get(`/games/fetch_route_riddles?routeName=${encodeURIComponent(routeID)}`);
+                if (Array.isArray(res.data)) {
+                    // Add fallback for missing fields and number them
+                    setRiddles(res.data.map((riddle: any, idx: number) => ({
+                        no: idx + 1,
+                        name: riddle.name || riddle.riddleName || 'Unnamed Riddle',
+                        episode: riddle.episode || '-',
+                        type: riddle.type || '-',
+                        ...riddle,
+                    })));
+                } else {
+                    setRiddles([]);
+                }
+            } catch (err) {
+                setRiddles([]);
+            }
+        }
+        fetchRiddles();
+    }, [routeID]);
 
     // Add Riddle modal state
     const [addRiddleOpen, setAddRiddleOpen] = useState(false);

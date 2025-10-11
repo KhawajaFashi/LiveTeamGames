@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { RIDDLE_DEFAULTS } from '../config/riddleDefaults.js';
 
 const riddleSchema = new Schema({
     gameName: {
@@ -23,10 +24,6 @@ const riddleSchema = new Schema({
         enum: ['Standard', 'Indoor', 'Bachelor Game', 'Bachelorette Game', 'Bachelor Game No Action Pack', 'Bachelorette Game No Action Pack', 'Cristmas Adventures', 'Cristmas Adventures No Action Pack'],
         required: true,
     },
-    routeName: {
-        type: String,
-        required: true,
-    },
     coordinates: {
         type: {
             type: String,
@@ -45,8 +42,7 @@ const riddleSchema = new Schema({
         required: true,
     },
     piture: {
-        type: String,
-        required: true,
+        type: String
     },
 
     description: String,
@@ -60,22 +56,38 @@ const riddleSchema = new Schema({
     allowedAttempts: Number,
     allowedTime: Number,
     metaData: String,
-    helpImage: String, 
+    helpImage: String,
     conditionalExitPoint: Boolean,
     accessConditionType: String,
     accessConditionAmount: String,
 
     arImageTarget: {
-        type: String,
-        required: function () {
-            return this.type === "Augmented Reality";
-        },
+        type: String
     },
 
 }, { timestamps: true })
 
+// Pre-save hook to set default values based on type and category
+riddleSchema.pre("save", function (next) {
+    const type = this.type;
+    const category = this.category;
 
+    if (RIDDLE_DEFAULTS[type] && RIDDLE_DEFAULTS[type][category]) {
+        const defaults = RIDDLE_DEFAULTS[type][category];
 
+        // Apply only if not explicitly set
+        if (!this.radius) this.radius = defaults.radius;
+        if (!this.allowedTime) this.allowedTime = defaults.allowedTime;
+        if (!this.deductionPercent) this.deductionPercent = defaults.deductionPercent;
+    }
+
+    // General sensible defaults
+    if (!this.maxScore) this.maxScore = 100;
+    if (!this.tries) this.tries = 3;
+    if (!this.allowedAttempts) this.allowedAttempts = 3;
+
+    next();
+});
 const riddle = model("riddle", riddleSchema);
 
 export default riddle;
