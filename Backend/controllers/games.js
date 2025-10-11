@@ -11,13 +11,14 @@ export const fetchRouteRiddles = async (req, res) => {
             });
         }
         const foundRoute = await route.findOne({ name: routeName }).populate('riddle');
-
+        
         if (!foundRoute) {
             return res.status(404).json({
                 success: false,
                 message: "Route not found",
             });
         }
+        // console.log("Found route with riddles:", foundRoute);
 
         const riddlesList = foundRoute.riddle || [];
         // console.log("Found route:", riddlesList);

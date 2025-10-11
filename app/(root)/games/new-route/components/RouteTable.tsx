@@ -60,10 +60,11 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
         async function fetchRiddles() {
             try {
                 if (!routeID) return;
-                const res = await axios.get(`/games/fetch_route_riddles?routeName=${encodeURIComponent(routeID)}`);
-                if (Array.isArray(res.data)) {
+                const res = await api.get(`/games/fetch_route_riddles?routeName=${encodeURIComponent(routeID)}`);
+                console.log(res.data)
+                if (res.data.success) {
                     // Add fallback for missing fields and number them
-                    setRiddles(res.data.map((riddle: any, idx: number) => ({
+                    setRiddles(res.data.data.map((riddle: any, idx: number) => ({
                         no: idx + 1,
                         name: riddle.name || riddle.riddleName || 'Unnamed Riddle',
                         episode: riddle.episode || '-',
