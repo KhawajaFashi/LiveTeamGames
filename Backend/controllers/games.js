@@ -11,7 +11,7 @@ export const fetchRouteRiddles = async (req, res) => {
             });
         }
         const foundRoute = await route.findOne({ name: routeName }).populate('riddle');
-        
+
         if (!foundRoute) {
             return res.status(404).json({
                 success: false,
@@ -198,58 +198,87 @@ export const addRiddle = async (req, res) => {
             coordinates,
             radius,
             picture,
-            description,
-            solutions,
-            hint,
-            maxScore,
-            tries,
-            deductionPercent,
-            allowedAttempts,
+            description = "Solve this exciting riddle!",
+            solutions = [],
+            hint = "",
+            maxScore = 1000,
+            tries = 1,
+            deductionPercent = 10,
+            allowedAttempts = 3,
             allowedTime,
-            metaData,
-            helpImage,
-            conditionalExitPoint,
-            accessConditionType,
-            accessConditionAmount,
-            arImageTarget
+            metaData = "",
+            helpImage = "",
+            conditionalExitPoint = false,
+            accessConditionType = "none",
+            accessConditionAmount = 0,
+            arImageTarget = ""
         } = req.body;
 
-        const newRiddle = new riddle({
-            gameName,
+        // Validate required fields
+        if (!name || !type || !category || !routeName || !coordinates || !radius) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields: name, type, category, routeName, coordinates, and radius are required"
+            });
+        }
+
+        // Find the route where we want to add the riddle
+        const existingRoute = await route.findOne({ name: routeName });
+        if (!existingRoute) {
+            return res.status(404).json({
+                success: false,
+                message: "Route not found"
+            });
+        }
+
+        // Build riddle object matching the schema
+        const riddlePayload = {
+            gameName: gameName || existingRoute.gameName,
             name,
-            episode,
+            episode: episode ? Number(episode) : 1,
             type,
             category,
-            routeName,
             coordinates: {
                 type: "Point",
-                coordinates: coordinates
+                // Ensure coordinates are numbers and in [lng, lat] order if provided as strings
+                coordinates: Array.isArray(coordinates) ? coordinates.map(Number) : [Number(coordinates)]
             },
-            radius,
-            picture,
+            radius: Number(radius),
+            piture: picture || "",
             description,
-            solutions,
-            hint,
-            maxScore,
-            tries,
-            deductionPercent,
-            allowedAttempts,
-            allowedTime,
-            metaData,
-            helpImage,
-            conditionalExitPoint,
-            accessConditionType,
-            accessConditionAmount,
-            arImageTarget
-        });
+            solutions: Array.isArray(solutions) ? solutions : (solutions ? [solutions] : []),
+            hint: hint || "",
+            maxScore: Number(maxScore),
+            tries: Number(tries),
+            deductionPercent: Number(deductionPercent),
+            allowedAttempts: Number(allowedAttempts),
+            allowedTime: allowedTime ? Number(allowedTime) : undefined,
+            metaData: metaData || "",
+            helpImage: helpImage || "",
+            conditionalExitPoint: Boolean(conditionalExitPoint),
+            accessConditionType: accessConditionType || "",
+            accessConditionAmount: String(accessConditionAmount || "0"),
+            arImageTarget: arImageTarget || ""
+        };
 
-        // The pre-save hook will automatically set default values based on type and category
+        // Create and save the riddle
+        const newRiddle = new riddle(riddlePayload);
         const savedRiddle = await newRiddle.save();
 
-        res.status(201).json({
+        // Associate the riddle with the route
+        existingRoute.riddle = existingRoute.riddle || [];
+        existingRoute.riddle.push(savedRiddle._id);
+        existingRoute.numberOfItems = existingRoute.riddle.length;
+        await existingRoute.save();
+
+        const allRiddles = await riddle.find({ _id: { $in: existingRoute.riddle } });
+        // console.log("All riddles for the route after addition:", allRiddles);
+
+        // Return success response
+        return res.status(201).json({
             success: true,
-            data: savedRiddle,
-            message: "Riddle created successfully"
+            data: allRiddles,
+            message: "Riddle created and associated with route successfully"
         });
     } catch (error) {
         res.status(500).json({

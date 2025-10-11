@@ -11,6 +11,8 @@ import { PiGearBold } from 'react-icons/pi';
 
 import axios from 'axios';
 import { useEffect } from 'react';
+import { RIDDLE_COORDINATES } from '../../../../../Backend/config/riddleCoordinates';
+import { RIDDLE_DEFAULTS } from '../../../../../Backend/config/riddleDefaults';
 import api from '@/utils/axios';
 
 interface RouteTableProps {
@@ -32,19 +34,36 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
     const [keepTextContents, setKeepTextContents] = useState(false);
     const [menuOpenIdx, setMenuOpenIdx] = useState<number | null>(null);
     const router = useRouter();
+    type RiddleType = 'Location Based Riddle' | 'Augmented Reality' | 'Multiple Choice' | 'Action Pack' | 'Mini Game';
+    type RiddleCategory = 'Standard' | 'Indoor' | 'Bachelor Game' | 'Bachelorette Game' |
+        'Bachelor Game No Action Pack' | 'Bachelorette Game No Action Pack' |
+        'Cristmas Adventures' | 'Cristmas Adventures No Action Pack';
+
+    interface Riddle {
+        no: number;
+        gameName: String;
+        name: string;
+        episode: number;
+        type: string;
+        category?: string;
+        coordinates?: string[];
+        radius?: number;
+        allowedTime?: number;
+        deductionPercent?: number;
+    }
+
     // Riddle table state
-    const [riddles, setRiddles] = useState<any[]>([]);
+    const [riddles, setRiddles] = useState<Riddle[]>([]);
 
     // Fetch riddles for this route from backend
     useEffect(() => {
         async function fetchRiddles() {
             try {
                 if (!routeID) return;
-                const res = await api.get(`/games/fetch_route_riddles?routeName=${encodeURIComponent(routeID)}`);
-                if (res.data.success) {
-                    // console.log(res.data.data)
+                const res = await axios.get(`/games/fetch_route_riddles?routeName=${encodeURIComponent(routeID)}`);
+                if (Array.isArray(res.data)) {
                     // Add fallback for missing fields and number them
-                    setRiddles(res.data.data.map((riddle: any, idx: number) => ({
+                    setRiddles(res.data.map((riddle: any, idx: number) => ({
                         no: idx + 1,
                         name: riddle.name || riddle.riddleName || 'Unnamed Riddle',
                         episode: riddle.episode || '-',
@@ -81,7 +100,7 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
 
     // Riddle options (mock)
     const riddleCategories = ['Standard', 'Indoor', 'Bachelor Game', 'Bachelorette Game', 'Bachelor Game No Action Pack', 'Bachelorette Game No Action Pack', 'Cristmas Adventures', 'Cristmas Adventures No Action Pack'];
-    const riddleTypes = ['Augmented Reality', 'Location Based', 'Action Pack', 'Minigame', 'Mutiple Choice'];
+    const riddleTypes = ['Augmented Reality', 'Location Based Riddle', 'Action Pack', 'Mini Game', 'Mutiple Choice'];
     const riddleOptions = [
         'AR Safe 1 (Numbers)',
         'AR Safe 2 (Colors)',
@@ -218,18 +237,50 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                         <button className="px-4 py-2 rounded bg-gray-100 text-gray-700 hover:bg-gray-200" onClick={() => setAddRiddleOpen(false)}>Close</button>
                                         <button
                                             className="px-4 py-2 rounded bg-[#009FE3] text-white font-semibold hover:bg-[#007bb5]"
-                                            onClick={() => {
-                                                // Add riddle to table
-                                                setRiddles(prev => [
-                                                    ...prev,
-                                                    {
-                                                        no: prev.length + 1,
+                                            onClick={async () => {
+                                                try {
+                                                    // Get coordinates and defaults based on category and type
+                                                    const riddleTypeKey = riddleType as RiddleType;
+                                                    const categoryKey = riddleCategory as RiddleCategory;
+
+                                                    const coordinates = RIDDLE_COORDINATES[riddleTypeKey]?.[categoryKey]?.coordinates || ["52.520008", "13.404954"];
+                                                    const defaults = RIDDLE_DEFAULTS[riddleTypeKey]?.[categoryKey] || RIDDLE_DEFAULTS["Location Based Riddle"]["Standard"];
+                                                    const radius = RIDDLE_COORDINATES[riddleTypeKey]?.[categoryKey]?.radius || 30;
+
+                                                    const newRiddle: Omit<Riddle, 'no'> & { routeName: string } = {
+                                                        gameName: gameID,
                                                         name: riddle,
                                                         episode: Number(episode),
                                                         type: riddleType,
-                                                    },
-                                                ]);
-                                                setAddRiddleOpen(false);
+                                                        category: riddleCategory,
+                                                        routeName: routeID,
+                                                        coordinates,
+                                                        radius,
+                                                        allowedTime: defaults.allowedTime,
+                                                        deductionPercent: defaults.deductionPercent
+                                                    };
+
+                                                    // Send to backend
+                                                    const response = await api.post<Riddle>('/games/add_riddle', newRiddle);
+
+                                                    if (response.data) {
+                                                        // Add riddle to table with the data from response
+                                                        setRiddles(prev => [
+                                                            ...prev,
+                                                            {
+                                                                ...response.data,
+                                                                no: prev.length + 1,
+                                                                name: riddle,
+                                                                episode: Number(episode),
+                                                                type: riddleType,
+                                                            },
+                                                        ]);
+                                                        setAddRiddleOpen(false);
+                                                    }
+                                                } catch (error) {
+                                                    console.error('Error adding riddle:', error);
+                                                    // You might want to show an error message to the user here
+                                                }
                                             }}
                                         >Add Riddle</button>
                                     </div>

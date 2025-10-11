@@ -1,0 +1,53 @@
+// riddleCoordinates.js
+export const RIDDLE_COORDINATES = {
+    "Location Based Riddle": {
+        Standard: { coordinates: ["52.520008", "13.404954"], radius: 60 }, // Berlin
+        Indoor: { coordinates: ["52.516181", "13.376935"], radius: 25 },
+        "Bachelor Game": { coordinates: ["52.518970", "13.405776"], radius: 22 },
+        "Bachelorette Game": { coordinates: ["52.522588", "13.409361"], radius: 18 },
+        "Bachelor Game No Action Pack": { coordinates: ["52.516856", "13.378721"], radius: 24 },
+        "Bachelorette Game No Action Pack": { coordinates: ["52.519843", "13.400749"], radius: 19 },
+        "Cristmas Adventures": { coordinates: ["52.523403", "13.411206"], radius: 23 },
+        "Cristmas Adventures No Action Pack": { coordinates: ["52.517632", "13.402843"], radius: 21 },
+    },
+    "Augmented Reality": {
+        Standard: { coordinates: ["52.520008", "13.404954"], radius: 55 },
+        Indoor: { coordinates: ["52.516181", "13.376935"], radius: 18 },
+        "Bachelor Game": { coordinates: ["52.518970", "13.405776"], radius: 21 },
+        "Bachelorette Game": { coordinates: ["52.522588", "13.409361"], radius: 17 },
+        "Bachelor Game No Action Pack": { coordinates: ["52.516856", "13.378721"], radius: 20 },
+        "Bachelorette Game No Action Pack": { coordinates: ["52.519843", "13.400749"], radius: 16 },
+        "Cristmas Adventures": { coordinates: ["52.523403", "13.411206"], radius: 22 },
+        "Cristmas Adventures No Action Pack": { coordinates: ["52.517632", "13.402843"], radius: 18 },
+    },
+    "Multiple Choice": {
+        Standard: { coordinates: ["52.520008", "13.404954"], radius: 52 },
+        Indoor: { coordinates: ["52.516181", "13.376935"], radius: 23 },
+        "Bachelor Game": { coordinates: ["52.518970", "13.405776"], radius: 19 },
+        "Bachelorette Game": { coordinates: ["52.522588", "13.409361"], radius: 15 },
+        "Bachelor Game No Action Pack": { coordinates: ["52.516856", "13.378721"], radius: 18 },
+        "Bachelorette Game No Action Pack": { coordinates: ["52.519843", "13.400749"], radius: 14 },
+        "Cristmas Adventures": { coordinates: ["52.523403", "13.411206"], radius: 20 },
+        "Cristmas Adventures No Action Pack": { coordinates: ["52.517632", "13.402843"], radius: 17 },
+    },
+    "Action Pack": {
+        Standard: { coordinates: ["52.520008", "13.404954"], radius: 65 },
+        Indoor: { coordinates: ["52.516181", "13.376935"], radius: 28 },
+        "Bachelor Game": { coordinates: ["52.518970", "13.405776"], radius: 25 },
+        "Bachelorette Game": { coordinates: ["52.522588", "13.409361"], radius: 20 },
+        "Bachelor Game No Action Pack": { coordinates: ["52.516856", "13.378721"], radius: 26 },
+        "Bachelorette Game No Action Pack": { coordinates: ["52.519843", "13.400749"], radius: 22 },
+        "Cristmas Adventures": { coordinates: ["52.523403", "13.411206"], radius: 27 },
+        "Cristmas Adventures No Action Pack": { coordinates: ["52.517632", "13.402843"], radius: 23 },
+    },
+    "Mini Game": {
+        Standard: { coordinates: ["52.520008", "13.404954"], radius: 48 },
+        Indoor: { coordinates: ["52.516181", "13.376935"], radius: 30 },
+        "Bachelor Game": { coordinates: ["52.518970", "13.405776"], radius: 28 },
+        "Bachelorette Game": { coordinates: ["52.522588", "13.409361"], radius: 24 },
+        "Bachelor Game No Action Pack": { coordinates: ["52.516856", "13.378721"], radius: 29 },
+        "Bachelorette Game No Action Pack": { coordinates: ["52.519843", "13.400749"], radius: 25 },
+        "Cristmas Adventures": { coordinates: ["52.523403", "13.411206"], radius: 31 },
+        "Cristmas Adventures No Action Pack": { coordinates: ["52.517632", "13.402843"], radius: 26 },
+    },
+};
