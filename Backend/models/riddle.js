@@ -41,7 +41,7 @@ const riddleSchema = new Schema({
         type: Number,
         required: true,
     },
-    piture: {
+    picture: {
         type: String
     },
 

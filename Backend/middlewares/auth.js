@@ -24,13 +24,13 @@ async function checkAuth(req, res, next) {
         req.headers?.cookie?.split(" ")[0].split("=")[1] ||
         req.body?.token
 
-    console.log(`\n\n\nUser UID from cookie: ${req.cookies?.uid}\n\n\n\n`);
-    console.log(`\n\n\nUser from checkAuth middleware: ${req.headers?.cookie?.split(" ")[0].split("=")[1]}\n\n\n\n`);
-    console.log(`\n\n\nUser UID from body: ${req.body?.token}\n\n\n\n`);
+    // console.log(`\n\n\nUser UID from cookie: ${req.cookies?.uid}\n\n\n\n`);
+    // console.log(`\n\n\nUser from checkAuth middleware: ${req.headers?.cookie?.split(" ")[0].split("=")[1]}\n\n\n\n`);
+    // console.log(`\n\n\nUser UID from body: ${req.body?.token}\n\n\n\n`);
 
     // console.log('Cookie received:', req.cookies);
     // console.log(JSON.stringify(req, null, 2));
-    console.log(`Req body from middleware: ${req.body} `);
+    // console.log(`Req body from middleware: ${req.body} `);
     // console.log(`Req cookies from middleware: ${req.cookies} `);
 
     const user = getUser(userUid);

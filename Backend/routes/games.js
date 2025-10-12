@@ -14,6 +14,8 @@ import {
     editRiddleStructure,
     duplicateRoute,
     fetchRouteRiddles,
+    editRiddle,
+    fetchRouteSettings,
 } from '../controllers/games.js';
 import {
     addRouteTemplate,
@@ -24,8 +26,10 @@ const router = Router();
 
 router.get('/fetch_data', fetchGameData);
 router.get('/fetch_route_riddles', fetchRouteRiddles);
+router.get('/fetch_settings', fetchRouteSettings);
 router.get('/get_template', getRouteTemplates);
 router.post('/add_route', addRoute);
+router.post('/edit_riddle', editRiddle);
 router.post('/update_favourite', updateFavourite);
 router.post('/update_status', updateStatus);
 router.post('/update_settings', updateSettings);

@@ -1,5 +1,6 @@
 import route from "../models/route.js";
 import riddle from "../models/riddle.js";
+import { RIDDLE_DEFAULTS } from "../config/riddleDefaults.js";
 // Fetch all riddles for a given route name
 export const fetchRouteRiddles = async (req, res) => {
     try {
@@ -11,7 +12,7 @@ export const fetchRouteRiddles = async (req, res) => {
             });
         }
         const foundRoute = await route.findOne({ name: routeName }).populate('riddle');
-        
+
         if (!foundRoute) {
             return res.status(404).json({
                 success: false,
@@ -90,36 +91,42 @@ export const addRoute = async (req, res) => {
             favourite: false,
             adminCode,
             cheatCode,
+            whiteLabel: "",
             numberOfItems: riddles ? riddles.length : 0,
 
             // Default settings
             general: {
-                backgroundMusic: { defaultStatus: "active", path: "" },
-                gameLogo: { defaultStatus: "active", path: "" },
-                welcomeBackground: { defaultStatus: "active", path: "" },
-                helpBackground: { defaultStatus: "active", path: "" },
-                itemIcon: { defaultStatus: "active", path: "" },
-                scoreIcon: { defaultStatus: "active", path: "" }
+                backgroundMusic: { defaultStatus: true, path: "" },
+                gameLogo: { defaultStatus: true, path: "" },
+                welcomeBackground: { defaultStatus: true, path: "" },
+                helpBackground: { defaultStatus: true, path: "" },
+                itemIcon: { defaultStatus: true, path: "" },
+                scoreIcon: { defaultStatus: true, path: "" }
             },
             map: {
-                mapStyle: { defaultStatus: "active", path: "" },
-                mapQuestMarker: { defaultStatus: "active", path: "" },
-                mapTeamMarker: { defaultStatus: "active", path: "" },
-                finalLocationMarker: { defaultStatus: "active", path: "" },
-                mapLoader: { defaultStatus: "active", path: "" },
+                mapStyle: { defaultStatus: true, path: "" },
+                mapQuestMarker: { defaultStatus: true, path: "" },
+                mapTeamMarker: { defaultStatus: true, path: "" },
+                finalLocationMarker: { defaultStatus: true, path: "" },
+                mapLoader: { defaultStatus: true, path: "" },
                 mapHelping: [],
-                gearSettings: {
-                    startText: "",
-                    endText: "",
-                    endLocation: {
-                        active: false,
-                        name: "",
-                        coordinates: {
-                            lat: 0,
-                            lng: 0
-                        }
+            },
+
+            gearSettings: {
+                startText: "",
+                endText: "",
+                endLocation: {
+                    active: false,
+                    name: "",
+                    coordinates: {
+                        lat: 0,
+                        lng: 0
                     }
-                }
+                },
+                arVideoTutorial: "",
+                introVideo: "",
+                outroWinVideo: "",
+                outroLoseVideo: "",
             }
         });
 
@@ -176,10 +183,97 @@ export const updateGearSettings = async (req, res) => {
 
 }
 export const updateRoute = async (req, res) => {
+    try {
+        const payload = req.body || {};
+        const { _id, routeID, name } = payload;
 
+        // Find existing route by _id or by name/routeID
+        let existing = null;
+        if (_id) existing = await route.findById(_id);
+        else if (routeID) existing = await route.findOne({ name: routeID });
+        else if (name) existing = await route.findOne({ name });
+
+        if (!existing) {
+            return res.status(404).json({ success: false, message: 'Route not found' });
+        }
+
+        // Allowed top-level updatable fields
+        const updatable = ['name', 'playingTime', 'numberOfItems', 'cheatCode', 'adminCode', 'lang', 'active', 'favourite', 'description', 'whiteLabel'];
+
+        updatable.forEach(key => {
+            if (Object.prototype.hasOwnProperty.call(payload, key)) {
+                let val = payload[key];
+                // normalize numbers
+                if (['numberOfItems'].includes(key) && val !== undefined && val !== null && val !== '') val = Number(val);
+                existing[key] = val;
+            }
+        });
+
+        console.log(updatable, payload);
+
+        // Merge nested objects if provided
+        if (payload.general && typeof payload.general === 'object') {
+            existing.general = { ...(existing.general || {}), ...payload.general };
+        }
+
+        if (payload.map && typeof payload.map === 'object') {
+            existing.map = { ...(existing.map || {}), ...payload.map };
+        }
+
+        if (payload.gearSettings && typeof payload.gearSettings === 'object') {
+            // gearSettings typically lives under existing.map.gearSettings; accept both shapes
+            if (existing.map && typeof existing.map === 'object') {
+                existing.map.gearSettings = { ...(existing.map.gearSettings || {}), ...payload.gearSettings };
+            } else {
+                existing.gearSettings = { ...(existing.gearSettings || {}), ...payload.gearSettings };
+            }
+        }
+
+        // Replace riddles association if provided (array of ids)
+        if (Array.isArray(payload.riddles)) {
+            existing.riddle = payload.riddles;
+            existing.numberOfItems = payload.riddles.length;
+        }
+
+        const saved = await existing.save();
+        return res.status(200).json({ success: true, data: saved, message: 'Route updated' });
+    } catch (error) {
+        console.error('updateRoute error', error);
+        return res.status(500).json({ success: false, message: 'Error updating route', error: error.message });
+    }
 }
 export const updateRouteType = async (req, res) => {
 
+}
+export const fetchRouteSettings = async (req, res) => {
+    try {
+        const { routeName, _id } = req.query || {};
+        if (!routeName && !_id) return res.status(400).json({ success: false, message: 'routeName or _id query parameter is required' });
+
+        let found = null;
+        if (_id) found = await route.findById(_id).lean();
+        else found = await route.findOne({ name: routeName }).lean();
+
+        if (!found) return res.status(404).json({ success: false, message: 'Route not found' });
+
+        // return only the settings sections that the front-end cares about
+        const settings = {
+            name: found.name,
+            playingTime: found.playingTime,
+            numberOfItems: found.numberOfItems,
+            cheatCode: found.cheatCode,
+            adminCode: found.adminCode,
+            whiteLabel: found.whiteLabel || { defaultStatus: false, path: "" },
+            lang: found.lang,
+            general: found.general || {},
+            map: found.map || {},
+        };
+
+        return res.status(200).json({ success: true, data: settings, message: 'Route settings fetched' });
+    } catch (error) {
+        console.error('fetchRouteSettings error', error);
+        return res.status(500).json({ success: false, message: 'Error fetching route settings', error: error.message });
+    }
 }
 export const deleteRoute = async (req, res) => {
 
@@ -290,7 +384,85 @@ export const addRiddle = async (req, res) => {
     }
 }
 export const editRiddleStructure = async (req, res) => {
+    try {
+        const { _id, name, type, category, updateTexts, keepTextContents } = req.body;
+        if (!_id) return res.status(400).json({ success: false, message: '_id is required' });
 
+        const existing = await riddle.findById(_id);
+        if (!existing) return res.status(404).json({ success: false, message: 'Riddle not found' });
+
+        // Update basic structural fields
+        if (typeof name === 'string') existing.name = name;
+        if (typeof type === 'string') existing.type = type;
+        if (typeof category === 'string') existing.category = category;
+
+        // If type/category changed, apply sane defaults from RIDDLE_DEFAULTS
+        if (type) {
+            const defaultsForType = RIDDLE_DEFAULTS[type];
+            if (defaultsForType) {
+                const defaultsForCategory = defaultsForType[category] || defaultsForType['default'];
+                if (defaultsForCategory) {
+                    if (defaultsForCategory.radius !== undefined) existing.radius = defaultsForCategory.radius;
+                    if (defaultsForCategory.allowedTime !== undefined) existing.allowedTime = defaultsForCategory.allowedTime;
+                    if (defaultsForCategory.deductionPercent !== undefined) existing.deductionPercent = defaultsForCategory.deductionPercent;
+                }
+            }
+        }
+
+        // Optionally the frontend may send flags about updating textual content; keep them but do not alter other fields here.
+        // Save and return updated riddle
+        const saved = await existing.save();
+        return res.status(200).json({ success: true, data: saved, message: 'Riddle structure updated' });
+    } catch (error) {
+        console.error('editRiddleStructure error', error);
+        return res.status(500).json({ success: false, message: 'Error updating riddle structure', error: error.message });
+    }
+}
+
+
+
+
+export const editRiddle = async (req, res) => {
+    try {
+        const payload = req.body;
+        const { _id } = payload;
+        if (!_id) {
+            return res.status(400).json({ success: false, message: '_id is required' });
+        }
+
+        // Find existing riddle
+        const existing = await riddle.findById(_id);
+        if (!existing) {
+            return res.status(404).json({ success: false, message: 'Riddle not found' });
+        }
+
+        // Prepare update fields - only update provided fields
+        const updatable = [
+            'gameName', 'name', 'episode', 'coordinates', 'radius', 'description', 'piture', 'picture', 'solutions', 'hint', 'maxScore', 'tries', 'deductionPercent', 'allowedAttempts', 'allowedTime', 'metaData', 'helpImage', 'conditionalExitPoint', 'accessConditionType', 'accessConditionAmount', 'arImageTarget'
+        ];
+
+        updatable.forEach(key => {
+            if (Object.prototype.hasOwnProperty.call(payload, key)) {
+                let value = payload[key];
+                console.log("Payload for updating riddle:", value, payload[key]);
+                // normalize numbers
+                if (['episode', 'radius', 'maxScore', 'tries', 'deductionPercent', 'allowedAttempts', 'allowedTime'].includes(key) && value !== undefined && value !== null && value !== '') {
+                    value = Number(value);
+                }
+                // coordinates may be an array of strings/numbers
+                if (key === 'coordinates' && Array.isArray(value)) {
+                    value = { type: 'Point', coordinates: value.map(Number) };
+                }
+                existing[key] = value;
+            }
+        });
+
+        const saved = await existing.save();
+        console.log("Updated riddle:", saved);
+        return res.status(200).json({ success: true, data: saved, message: 'Riddle updated' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Error updating riddle', error: error.message });
+    }
 }
 export const duplicateRoute = async (req, res) => {
 

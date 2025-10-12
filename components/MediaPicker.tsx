@@ -1,3 +1,4 @@
+import api from '@/utils/axios';
 import Image from 'next/image';
 import React, { useState, useRef, useEffect } from 'react';
 
@@ -15,22 +16,23 @@ const filterOptions = [
     'Image',
 ];
 
-const initialMedia = [
-    {
-        type: 'folder', name: 'home', files: [
-            { type: 'image', name: 'castle.jpg', src: '/profile.png', lastModified: '30.07.2025 17:35', size: 611 },
-            { type: 'image', name: 'fries.jpg', src: '/stats.png', lastModified: '30.07.2025 17:35', size: 611 },
-        ]
-    },
-    { type: 'folder', name: 'Game1 with Action Pack', files: [] },
-];
+const initialMedia: any[] = [];
+
+export type FileType = {
+    type: string;
+    name: string;
+    src?: string;
+    lastModified?: string;
+    size?: number;
+};
 
 interface MediaPickerProps {
     open: boolean;
     onClose: () => void;
+    onSelect?: (file: FileType) => void;
 }
 
-const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose }) => {
+const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) => {
     const [activeFilter, setActiveFilter] = useState('All');
     const [activeSort, setActiveSort] = useState(sortOptions[0]);
     const [openFilter, setOpenFilter] = useState(false);
@@ -64,16 +66,16 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose }) => {
     const folderFiles = folderObj?.files || [];
 
     // Filter and sort logic (mock)
-    const filteredMedia = folderFiles.filter(m =>
+    const filteredMedia = folderFiles.filter((m: FileType) =>
         (activeFilter === 'All' || m.type.toLowerCase() === activeFilter.toLowerCase()) &&
         m.name.toLowerCase().includes(search.toLowerCase())
     );
 
     // Sort logic (mock)
-    const sortedMedia = [...filteredMedia].sort((a, b) => {
+    const sortedMedia = [...filteredMedia].sort((a: FileType, b: FileType) => {
         switch (activeSort) {
-            case 'Newest First': return a.lastModified.localeCompare(b.lastModified || '');
-            case 'Oldest First': return b.lastModified.localeCompare(a.lastModified || '');
+            case 'Newest First': return (a.lastModified || '').localeCompare(b.lastModified || '');
+            case 'Oldest First': return (b.lastModified || '').localeCompare(a.lastModified || '');
             case 'A-Z': return a.name.localeCompare(b.name);
             case 'Z-A': return b.name.localeCompare(a.name);
             default: return 0;
@@ -84,18 +86,81 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose }) => {
     function handleUpload(e: React.ChangeEvent<HTMLInputElement>): void {
         const files = e.target.files;
         if (files && files.length) {
-            // Add to current folder
-            const updatedMedia = media.map(f => {
-                if (f.type === 'folder' && f.name === currentFolder) {
-                    return {
-                        ...f,
-                        files: [...f.files, { type: 'image', name: files[0].name, src: '', lastModified: 'now', size: 0 }],
-                    };
-                }
-                return f;
-            });
-            setMedia(updatedMedia);
+            const file = files[0];
+            // small client-side validation
+            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                alert('Only images and videos are supported');
+                return;
+            }
+
+            // show immediate UI feedback by adding a temporary entry with object URL
+            const tempUrl = URL.createObjectURL(file);
+            const optimistic = { type: 'image', name: file.name, src: tempUrl, lastModified: 'now', size: file.size } as FileType;
+            setMedia(prev => prev.map((f) => f.type === 'folder' && f.name === currentFolder ? { ...f, files: [...(f.files || []), optimistic] } : f));
             setShowUpload(false);
+
+            // Upload to Cloudinary
+            (async () => {
+                try {
+                    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+                    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+                    if (!cloudName || !uploadPreset) {
+                        console.error('Cloudinary env vars not set');
+                        // leave optimistic preview
+                        return;
+                    }
+
+                    const form = new FormData();
+                    form.append('file', file);
+                    form.append('upload_preset', uploadPreset);
+
+                    const cloudUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+                    const cloudRes = await fetch(cloudUrl, { method: 'POST', body: form });
+                    if (!cloudRes.ok) throw new Error('Cloudinary upload failed');
+                    const cloudData = await cloudRes.json();
+                    const secureUrl = cloudData.secure_url || cloudData.url;
+
+                    if (!secureUrl) throw new Error('No secure_url from Cloudinary');
+
+                    console.log(secureUrl)
+                    // Persist metadata to backend (store path as the cloud secure url)
+                    const saveRes = await api.post('/user/media', { folderName: currentFolder, name: file.name, path: secureUrl });
+                    console.log(saveRes)
+                    if (!saveRes.data.success) throw new Error('Failed to save media metadata');
+
+                    // Refresh media list from server to get canonical paths (and replace optimistic entry)
+                    await fetchUserMedia();
+                } catch (err) {
+                    console.error('Upload error', err);
+                    // Optionally: remove optimistic entry or mark as failed
+                    fetchUserMedia();
+                }
+            })();
+        }
+    }
+
+    async function fetchUserMedia() {
+        try {
+            const res = await api.get('/user/media');
+            if (!res.data.success) {
+                console.warn('Could not fetch user media');
+                return;
+            }
+            const data = res.data;
+            // Server returns { success: true, media: [{ folderName, images: [{name,path}] }] }
+            const serverMedia = data.media || [];
+            const mapped = serverMedia.map((f: any) => ({
+                type: 'folder',
+                name: f.folderName || f.name || 'home',
+                files: (f.images || []).map((img: any) => ({ type: 'image', name: img.name, src: img.path, lastModified: '', size: 0 })),
+            }));
+            // Ensure at least home folder exists
+            if (!mapped.find((m: any) => m.name === 'home')) mapped.unshift({ type: 'folder', name: 'home', files: [] });
+            setMedia(mapped);
+            // If current folder no longer exists, reset to home
+            if (!mapped.find((m: any) => m.name === currentFolder)) setCurrentFolder(mapped[0].name);
+        } catch (err) {
+            console.error('Error fetching user media', err);
         }
     }
 
@@ -134,16 +199,16 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose }) => {
     function handleMoveFiles(): void {
         if (!moveTargetFolder) return;
         // Remove files from current folder
-        const updatedMedia = media.map(folder => {
+        const updatedMedia = media.map((folder: any) => {
             if (folder.type === 'folder' && folder.name === currentFolder) {
                 return {
                     ...folder,
-                    files: folder.files.filter(f => !selectedFiles.some(sf => sf.name === f.name)),
+                    files: folder.files.filter((f: FileType) => !selectedFiles.some((sf: FileType) => sf.name === f.name)),
                 };
             }
             if (folder.type === 'folder' && folder.name === moveTargetFolder) {
                 // Ensure all files have required properties
-                const normalizedFiles = (selectedFiles || []).map(f => ({
+                const normalizedFiles = (selectedFiles || []).map((f: FileType) => ({
                     type: f.type,
                     name: f.name,
                     src: f.src || '',
@@ -180,12 +245,20 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose }) => {
         };
     }, [bulkMenuOpen]);
 
+    // When the picker opens, fetch user-specific media from backend
+    useEffect(() => {
+        if (open) {
+            fetchUserMedia();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open]);
+
     // ❌ previously before hooks
     if (!open) return null; // ✅ now it’s after all hooks
 
 
     return (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-200">
             <div className="bg-white w-screen h-screen relative p-6">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold">Choose From Media</h2>
@@ -244,9 +317,32 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose }) => {
                         const isSelected = selectedFiles.some(f => f.name === m.name);
                         return (
                             <div key={i} className={`bg-gray-100 rounded-lg flex flex-col items-center justify-center h-32 cursor-pointer relative ${isSelected ? 'bg-blue-100' : ''}`}
-                                onClick={() => toggleFileSelection(m)}>
+                                onClick={() => toggleFileSelection(m)}
+                                onDoubleClick={() => {
+                                    console.debug('MediaPicker dblclick', m);
+                                    if (selectedFiles.length === 0 || !selectedFiles.some(f => f.name === m.name)) setSelectedFiles([m]);
+                                    if (typeof onSelect === 'function') {
+                                        onSelect(m as FileType);
+                                        onClose();
+                                    }
+                                }}>
                                 <input type="checkbox" checked={isSelected} onChange={() => toggleFileSelection(m)} className="absolute top-2 left-2 w-4 h-4 accent-pink-500" />
                                 <Image src={m.src} alt={m.name} width={1000} height={1000} className="w-20 h-20 object-cover rounded" />
+                                {/* Select button for single-click selection */}
+                                <button
+                                    className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-[#009FE3] text-white text-xs px-2 py-1 rounded"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        // set selected and call onSelect
+                                        setSelectedFiles([m]);
+                                        if (typeof onSelect === 'function') {
+                                            onSelect(m as FileType);
+                                        }
+                                        onClose();
+                                    }}
+                                >
+                                    Select
+                                </button>
                             </div>
                         );
                     })}

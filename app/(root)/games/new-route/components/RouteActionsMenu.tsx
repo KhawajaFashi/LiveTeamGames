@@ -45,6 +45,22 @@ const RouteActionsMenu: React.FC<RouteActionsMenuProps> = ({ open, onOpen, onClo
         onClose();
         if (onDelete) onDelete();
     };
+    const [menuPosition, setMenuPosition] = React.useState<'bottom' | 'top'>('bottom');
+
+    React.useEffect(() => {
+        if (open && menuRef.current) {
+            const rect = menuRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            if (spaceBelow < 200) { // menu height approx
+
+                setMenuPosition('top');
+            } else {
+                setMenuPosition('bottom');
+            }
+            console.log('Menu position set to:', spaceBelow);
+        }
+    }, [open]);
+
 
     return (
         <div className="relative" ref={menuRef}>
@@ -54,7 +70,8 @@ const RouteActionsMenu: React.FC<RouteActionsMenuProps> = ({ open, onOpen, onClo
                 </svg>
             </button>
             {open && (
-                <div className="absolute right-0 mt-2 mr-20 w-32 text-[13px] bg-white border rounded border-none shadow-[0px_-1px_3px_1px_rgba(0,0,0,0.3)] z-10">
+                <div className="absolute right-0 mt-2 mr-20 w-40 text-[13px] bg-white border rounded border-none shadow-[0px_-1px_3px_1px_rgba(0,0,0,0.3)] z-10"
+                    style={menuPosition === 'top' ? { bottom: '100%', marginBottom: '8px' } : { top: '100%', marginTop: '8px' }}>
                     <button onClick={handleEdit} className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2">
                         <FaRegEdit />
                         Edit

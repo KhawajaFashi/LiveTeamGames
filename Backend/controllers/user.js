@@ -14,7 +14,7 @@ async function handleUserLogin(req, res) {
     try {
         const { email, password } = req.body;
         // console.log(email, password);
-        console.log("Right Here 1")
+        // console.log("Right Here 1")
         const token = await matchPasswordAndGenerateToken(email, password);
         if (!token) {
             res.status(404).json({ message: "Password didnot match" });
@@ -45,7 +45,7 @@ async function handleUserLogout(req, res) {
 
 
 async function verify_login(req, res) {
-    console.log("Inside verify_login", req.user, req.body);
+    // console.log("Inside verify_login", req.user, req.body);
     if (req.user) {
         const token = req.body.token;
         if (!token) {
@@ -53,7 +53,7 @@ async function verify_login(req, res) {
         }
         else {
             const verifiedUser = getUser(token);
-            console.log("Why in verify_login", JSON.stringify(verifiedUser), JSON.stringify(req.user), JSON.stringify(req.user) === JSON.stringify(verifiedUser));
+            // console.log("Why in verify_login", JSON.stringify(verifiedUser), JSON.stringify(req.user), JSON.stringify(req.user) === JSON.stringify(verifiedUser));
             if (JSON.stringify(req.user) === JSON.stringify(verifiedUser))
                 res.status(200).json({ message: "User is logged in", valid: true, user: req.user });
             else
@@ -72,7 +72,7 @@ async function uploadData(req, res) {
     try {
         // console.log("Data received for update:", data, req.user);
         const user = await User.findById(userId);
-        console.log("User found for update:", user);
+        // console.log("User found for update:", user);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -89,7 +89,7 @@ async function uploadData(req, res) {
             data.password = data.newPassword;
         }
         // data =
-        console.log("Data received for update:", data, token);
+        // console.log("Data received for update:", data, token);
 
         user.set(data);
         // console.log("User profile set:", user);
@@ -108,7 +108,7 @@ async function uploadData(req, res) {
 
 async function fetchUserProfile(req, res) {
     // console.log("Inside fetchUserProfile", req.headers.cookie.startsWith("uid"));
-    console.log("Inside fetchUserProfile 2", req.headers?.cookie?.split(" ")[0].split("=")[1]);
+    // console.log("Inside fetchUserProfile 2", req.headers?.cookie?.split(" ")[0].split("=")[1]);
     const userId = req.user ? req.user._id : null;
     try {
         const user = await User.findById(userId);
@@ -125,6 +125,67 @@ async function fetchUserProfile(req, res) {
     }
 }
 
+async function getUserMedia(req, res) {
+    try {
+        const userId = req.user ? req.user._id : null;
+        if (!userId) return res.status(401).json({ success: false, message: 'Not authenticated' });
+        const user = await User.findById(userId).lean();
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        return res.status(200).json({ success: true, media: user.media || [] });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: 'Error fetching media' });
+    }
+}
+
+async function addUserMedia(req, res) {
+    try {
+        const userId = req.user ? req.user._id : null;
+        if (!userId) return res.status(401).json({ success: false, message: 'Not authenticated' });
+        const { folderName = 'home', name, path } = req.body;
+        if (!name || !path) return res.status(400).json({ success: false, message: 'name and path are required' });
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        user.media = user.media || [];
+        let folder = user.media.find(f => f.folderName === folderName);
+        if (!folder) {
+            folder = { folderName, images: [] };
+            user.media.push(folder);
+        }
+        // avoid duplicates
+        const exists = folder.images.find(img => img.name === name && img.path === path);
+        if (!exists) folder.images.push({ name, path });
+
+        await user.save();
+        return res.status(200).json({ success: true, media: user.media });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: 'Error adding media' });
+    }
+}
+
+async function deleteUserMedia(req, res) {
+    try {
+        const userId = req.user ? req.user._id : null;
+        if (!userId) return res.status(401).json({ success: false, message: 'Not authenticated' });
+        const { folderName = 'home', name } = req.body;
+        if (!name) return res.status(400).json({ success: false, message: 'name is required' });
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        user.media = user.media || [];
+        const folder = user.media.find(f => f.folderName === folderName);
+        if (!folder) return res.status(404).json({ success: false, message: 'Folder not found' });
+        folder.images = folder.images.filter(img => img.name !== name);
+        await user.save();
+        return res.status(200).json({ success: true, media: user.media });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: 'Error deleting media' });
+    }
+}
+
 
 async function matchPasswordAndGenerateToken(email, password) {
     const user = await User.findOne({ email });
@@ -132,7 +193,7 @@ async function matchPasswordAndGenerateToken(email, password) {
     const Password = user.password;
     if (password !== Password) return null;
     const token = generateToken(user);
-    console.log("Generated Token:", token);
+    // console.log("Generated Token:", token);
     return token;
 }
 
@@ -144,5 +205,8 @@ export {
     handleUserLogout,
     verify_login,
     uploadData,
-    fetchUserProfile
+    fetchUserProfile,
+    getUserMedia,
+    addUserMedia,
+    deleteUserMedia
 };

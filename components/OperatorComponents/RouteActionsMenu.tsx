@@ -34,19 +34,19 @@ const RouteActionsMenu: React.FC<RouteActionsMenuProps> = ({ open, onOpen, onClo
         onClose();
     };
     // Dynamic menu position: open above if near bottom of viewport
-        const [menuPosition, setMenuPosition] = React.useState<'bottom' | 'top'>('bottom');
-    
-        React.useEffect(() => {
-            if (open && menuRef.current) {
-                const rect = menuRef.current.getBoundingClientRect();
-                const spaceBelow = window.innerHeight - rect.bottom;
-                if (spaceBelow < 200) { // menu height approx
-                    setMenuPosition('top');
-                } else {
-                    setMenuPosition('bottom');
-                }
+    const [menuPosition, setMenuPosition] = React.useState<'bottom' | 'top'>('bottom');
+
+    React.useEffect(() => {
+        if (open && menuRef.current) {
+            const rect = menuRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            if (spaceBelow < 200) { // menu height approx
+                setMenuPosition('top');
+            } else {
+                setMenuPosition('bottom');
             }
-        }, [open]);
+        }
+    }, [open]);
 
     return (
         <div className="relative" ref={menuRef}>
