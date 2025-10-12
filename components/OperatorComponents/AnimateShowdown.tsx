@@ -19,7 +19,7 @@ const AnimateShowdown: React.FC<AnimateShowdownProps> = ({ teams, onClose }) => 
     const [animatedScores, setAnimatedScores] = useState<number[]>(sortedTeams.map(t => 0));
     const [winnerIdx, setWinnerIdx] = useState<number | null>(null);
 
-    const duration = 30_000; // 30 seconds
+    const duration = 15000; // 30 seconds
     const interval = 30; // ms
     const maxScore = Math.max(...sortedTeams.map(t => Number(t.score)));
 

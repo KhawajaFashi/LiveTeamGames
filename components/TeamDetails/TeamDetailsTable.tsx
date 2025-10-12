@@ -1,30 +1,35 @@
 import React, { useRef, useState } from "react";
+import api from '@/utils/axios';
 import FilterPopup from "../OperatorComponents/OperatorFilterPopup";
 import { OperatorData } from "@/lib/LiveConfig";
 import Map from "../OperatorComponents/Google_map";
 import { FaArrowLeft } from "react-icons/fa";
 import TeamDetailsActionsMenu from "./TeamDetailsActionMenu";
 
-interface Riddle {
-    no: number;
-    riddleName: string;
-    episode: number;
-    riddleType: string;
-    status: string;
-    score: number;
+interface TeamRiddleEntry {
+    riddle: {
+        name: string;
+        episode?: number;
+        type?: string;
+    };
+    riddleStatus?: string;
+    riddleScore?: number;
 }
 
 interface TeamDetailsTableProps {
     team: {
         no: number;
         teamName: string;
-        riddles: Riddle[];
+        riddles: TeamRiddleEntry[] | [];
+        id?: string;
+        _id?: string;
     };
     onBack: () => void;
     OperatorData: OperatorData;
+    onUpdated?: (updatedTeam: any) => void;
 }
 
-const TeamDetailsTable: React.FC<TeamDetailsTableProps> = ({ team, onBack, OperatorData }) => {
+const TeamDetailsTable: React.FC<TeamDetailsTableProps> = ({ team, onBack, OperatorData, onUpdated }) => {
     const [mapView, setMapView] = useState<"map" | "satellite">("map");
     const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -37,9 +42,10 @@ const TeamDetailsTable: React.FC<TeamDetailsTableProps> = ({ team, onBack, Opera
     const [scoreModalIdx, setScoreModalIdx] = useState<number | null>(null);
     const [scoreType, setScoreType] = useState<'add' | 'subtract'>('add');
     const [scoreValue, setScoreValue] = useState<string>('');
+    console.log("Team:", team?.riddles)
 
     return (
-        <div className="w-full bg-white rounded-lg">
+        <div className="w-full bg-white rounded-lg p-5">
             {/* Change Score Modal */}
             {scoreModalIdx !== null && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.4)]">
@@ -47,7 +53,7 @@ const TeamDetailsTable: React.FC<TeamDetailsTableProps> = ({ team, onBack, Opera
                         <button className="absolute top-3 right-4 text-gray-400 text-xl" onClick={() => setScoreModalIdx(null)}>
                             ×
                         </button>
-                        <h2 className="text-lg font-semibold mb-7">Change Quest Score : {team.riddles[scoreModalIdx]?.riddleName ?? ''}</h2>
+                        <h2 className="text-lg font-semibold mb-7">Change Quest Score : {team?.riddles?.[scoreModalIdx ?? 0]?.riddle?.name ?? ''}</h2>
                         <div className="mb-4 flex gap-1 items-center w-full border-b pb-10 border-gray-200">
                             <div className="relative">
                                 <button
@@ -70,7 +76,25 @@ const TeamDetailsTable: React.FC<TeamDetailsTableProps> = ({ team, onBack, Opera
                         </div>
                         <div className="flex justify-end gap-2 mt-1 p-2">
                             <button className="px-4 py-1 bg-gray-100 rounded" onClick={() => { setScoreModalIdx(null); setScoreValue('') }}>Close</button>
-                            <button className="px-4 py-1 bg-[#00A3FF] text-white rounded" onClick={() => { setScoreModalIdx(null); setScoreValue('') }}>Save</button>
+                            <button className="px-4 py-1 bg-[#00A3FF] text-white rounded" onClick={async () => {
+                                // call backend to update score for this team's riddle
+                                try {
+                                    // we expect a prop team to have an identifier? rely on OperatorData mapping which will pass team id via closure if present
+                                    const teamId = (team as any)._id || (team as any).id;
+                                    if (!teamId) {
+                                        console.warn('No team id to update');
+                                        setScoreModalIdx(null); setScoreValue(''); return;
+                                    }
+                                    const riddleIndex = scoreModalIdx ?? 0;
+                                    const riddleScore = Number(scoreValue || 0);
+                                    const scoretype = scoreType;
+                                    const res = await api.post('/operator/update_team_score', { _id: teamId, riddleIndex, riddleScore, scoretype });
+                                    if (res.data && res.data.success) {
+                                        if (typeof onUpdated === 'function') onUpdated(res.data.data);
+                                    }
+                                } catch (err) { console.error(err); }
+                                setScoreModalIdx(null); setScoreValue('');
+                            }}>Save</button>
                         </div>
                     </div>
                 </div>
@@ -157,14 +181,14 @@ const TeamDetailsTable: React.FC<TeamDetailsTableProps> = ({ team, onBack, Opera
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {team.riddles?.map((riddle, index) => (
-                                <tr key={riddle.no}>
-                                    <td className="px-2 py-2 text-center">{riddle.no}</td>
-                                    <td className="px-2 py-2 text-center">{riddle.riddleName}</td>
-                                    <td className="px-2 py-2 text-center">{riddle.episode}</td>
-                                    <td className="px-2 py-2 text-center">{riddle.riddleType}</td>
-                                    <td className="px-2 py-2 text-center">{riddle.status}</td>
-                                    <td className="px-2 py-2 text-center">{riddle.score}</td>
+                            {team.riddles?.map((riddle: TeamRiddleEntry, index: number) => (
+                                <tr key={index}>
+                                    <td className="px-2 py-2 text-center">{index + 1}</td>
+                                    <td className="px-2 py-2 text-center">{riddle.riddle?.name}</td>
+                                    <td className="px-2 py-2 text-center">{riddle.riddle?.episode}</td>
+                                    <td className="px-2 py-2 text-center">{riddle.riddle?.type}</td>
+                                    <td className="px-2 py-2 text-center">{riddle.riddleStatus}</td>
+                                    <td className="px-2 py-2 text-center">{riddle.riddleScore}</td>
                                     <td className="px-2 py-1 text-center relative">
                                         <TeamDetailsActionsMenu
                                             open={menuOpenIdx === index}

@@ -7,7 +7,6 @@ import {
     updateSettings,
     updateGearSettings,
     updateRoute,
-    updateRouteType,
     deleteRoute,
     deleteRiddle,
     addRiddle,
@@ -36,7 +35,6 @@ router.post('/toggle_status', updateStatus);
 router.post('/update_settings', updateSettings);
 router.post('/update_gear_settings', updateGearSettings);
 router.post('/update_route', updateRoute);
-router.post('/update_route_type', updateRouteType);
 router.post('/add_riddle', addRiddle);
 router.post('/add_template', addRouteTemplate);
 router.post('/edit_riddle_structure', editRiddleStructure);

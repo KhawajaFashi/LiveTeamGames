@@ -29,7 +29,7 @@ export default async function GamesPage({ searchParams }: GamesPageProps) {
             </div>
 
             {/* Game Table */}
-            <OperatorTable OperatorData={OperatorData} />
+            <OperatorTable OperatorData={OperatorData} operatorType={operatorType} />
         </div>
     );
 }

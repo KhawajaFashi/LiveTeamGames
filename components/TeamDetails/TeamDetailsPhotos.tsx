@@ -18,7 +18,8 @@ interface TeamDetailsPhotosProps {
     team: {
         no: number;
         teamName: string;
-        riddles: Riddle[];
+        riddles?: Riddle[];
+        teamPics?: string[];
     };
     onBack: () => void;
     OperatorData: OperatorData;
@@ -32,49 +33,11 @@ const TeamDetailsPhotos: React.FC<TeamDetailsPhotosProps> = ({ team, onBack, Ope
     const { teams } = OperatorData ?? {};
     const filterButtonRef = useRef<HTMLDivElement | null>(null);
 
-    // const [menuOpenIdx, setMenuOpenIdx] = useState<number | null>(null);
-    // const [showTeamDetailsIdx, setShowTeamDetailsIdx] = useState<number | null>(null);
-    const [scoreModalIdx, setScoreModalIdx] = useState<number | null>(null);
-    const [scoreType, setScoreType] = useState<'add' | 'subtract'>('add');
-    const [scoreValue, setScoreValue] = useState<string>('');
 
     return (
-        <div className="w-full bg-white rounded-lg">
+        <div className="w-full bg-white rounded-lg p-5">
             {/* Change Score Modal */}
-            {scoreModalIdx !== null && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.4)]">
-                    <div className="bg-white rounded-lg shadow-lg w-[30%] p-6 relative">
-                        <button className="absolute top-3 right-4 text-gray-400 text-xl" onClick={() => setScoreModalIdx(null)}>
-                            ×
-                        </button>
-                        <h2 className="text-lg font-semibold mb-7">Change Quest Score : {team.riddles[scoreModalIdx]?.riddleName ?? ''}</h2>
-                        <div className="mb-4 flex gap-1 items-center w-full border-b pb-10 border-gray-200">
-                            <div className="relative">
-                                <button
-                                    className="px-3 py-2 bg-[#00A3FF] text-white rounded-sm flex items-center gap-2"
-                                    onClick={() => setScoreType(scoreType === 'add' ? 'subtract' : 'add')}
-                                >
-                                    {scoreType === 'add' ? 'Add Score' : 'Subtract Score'}
-                                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <input
-                                type="number"
-                                className="border border-gray-300 px-3 py-2 rounded w-full flex-1"
-                                placeholder="Enter score"
-                                value={scoreValue}
-                                onChange={e => setScoreValue(e.target.value)}
-                            />
-                        </div>
-                        <div className="flex justify-end gap-2 mt-1 p-2">
-                            <button className="px-4 py-1 bg-gray-100 rounded" onClick={() => { setScoreModalIdx(null); setScoreValue('') }}>Close</button>
-                            <button className="px-4 py-1 bg-[#00A3FF] text-white rounded" onClick={() => { setScoreModalIdx(null); setScoreValue('') }}>Save</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            
             <div className="flex max-lg:flex-col max-lg:gap-3 justify-between items-center mb-6 font-semibold">
                 {/* Filter Dropdown */}
                 <div
@@ -145,12 +108,20 @@ const TeamDetailsPhotos: React.FC<TeamDetailsPhotosProps> = ({ team, onBack, Ope
                 {/* <h2 className="text-lg font-semibold mb-4">Team Details: {team.teamName}</h2> */}
                 <div className="w-[60%] max-lg:w-full bg-white rounded-lg h-100 shadow-sm overflow-auto flex flex-col justify-between">
                     <div className="flex flex-wrap gap-6 justify-start items-start p-4">
-                        {/* Replace these src URLs with real team photo URLs */}
-                        <Image src="/profile.png" alt="Team Photo 1" width={1000} height={1000} className="w-48 h-40 object-cover rounded-lg shadow" />
-                        <Image src="/profile.png" alt="Team Photo 1" width={1000} height={1000} className="w-48 h-40 object-cover rounded-lg shadow" />
-                        <Image src="/profile.png" alt="Team Photo 1" width={1000} height={1000} className="w-48 h-40 object-cover rounded-lg shadow" />
-                        <Image src="/profile.png" alt="Team Photo 1" width={1000} height={1000} className="w-48 h-40 object-cover rounded-lg shadow" />
-                        <Image src="/BO.jpg" alt="Team Photo 2" width={1000} height={1000} className="w-48 h-40 object-cover rounded-lg shadow" />
+                        {(team.teamPics && team.teamPics.length > 0) ? (
+                            team.teamPics.map((src, idx) => (
+                                <Image
+                                    key={idx}
+                                    src={src}
+                                    alt={`Team Photo ${idx + 1}`}
+                                    width={1000}
+                                    height={1000}
+                                    className="w-48 h-40 object-cover rounded-lg shadow"
+                                />
+                            ))
+                        ) : (
+                            <div className="text-gray-500">No photos available</div>
+                        )}
                     </div>
                     <button
                         className="w-24 flex items-center justify-center gap-2 px-5 py-1 border-1 border-gray-200 font-medium rounded hover:bg-sky-400 cursor-pointer hover:text-white transition-all duration-300 m-4"

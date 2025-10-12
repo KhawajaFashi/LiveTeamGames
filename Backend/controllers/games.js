@@ -310,9 +310,7 @@ export const updateRoute = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Error updating route', error: error.message });
     }
 }
-export const updateRouteType = async (req, res) => {
 
-}
 export const fetchRouteSettings = async (req, res) => {
     try {
         const { routeName, _id } = req.query || {};
@@ -534,9 +532,6 @@ export const editRiddleStructure = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Error updating riddle structure', error: error.message });
     }
 }
-
-
-
 
 export const editRiddle = async (req, res) => {
     try {

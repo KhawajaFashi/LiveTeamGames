@@ -2,14 +2,18 @@ import React from 'react'
 
 type ActiveView = "details" | "photos" | "videos" | "edit" | "table" | "info" | "delete" | null;
 
+import api from '@/utils/axios';
+
 interface Props {
+    teamId?: string;
     editTeamName: string;
     setEditTeamName: (name: string) => void;
     setActiveView: (view: ActiveView) => void;
+    onUpdated?: (updatedTeam: any) => void;
 }
 
 
-const TeamDetailsEdit = ({ editTeamName, setEditTeamName, setActiveView }: Props) => {
+const TeamDetailsEdit = ({ teamId, editTeamName, setEditTeamName, setActiveView, onUpdated }: Props) => {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.4)]">
             <div className="bg-white rounded-lg shadow-lg w-[30%] p-6 relative">
@@ -34,7 +38,17 @@ const TeamDetailsEdit = ({ editTeamName, setEditTeamName, setActiveView }: Props
                 </div>
                 <div className="flex justify-end gap-2 mt-8">
                     <button className="px-4 py-1 bg-gray-100 rounded" onClick={() => { setActiveView(null); }}>Close</button>
-                    <button className="px-4 py-1 bg-[#00A3FF] text-white rounded" onClick={() => { /* Save logic here */ setActiveView(null); }}>Edit Name</button>
+                    <button className="px-4 py-1 bg-[#00A3FF] text-white rounded" onClick={async () => {
+                        if (!teamId) { setActiveView(null); return; }
+                        try {
+                            const res = await api.post('/operator/update_team_name', { _id: teamId, name: editTeamName });
+                            console.log("Response: ", res)
+                            if (res.data && res.data.success) {
+                                if (onUpdated) onUpdated(res.data.data);
+                            }
+                        } catch (err) { console.error(err); }
+                        setActiveView(null);
+                    }}>Edit Name</button>
                 </div>
             </div>
         </div>

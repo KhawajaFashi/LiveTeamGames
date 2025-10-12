@@ -23,25 +23,29 @@ const TeamsSchema = new Schema({
         required: true,
     },
     StartedAt: {
-        type: Number,
+        type: Date,
         required: true,
+    },
+
+    score: {
+        type: Number
     },
 
     riddles: [
         {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Riddle",
+            riddle: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "riddle",
+            },
+            riddleStatus: {
+                type: String,
+                enum: ["SOLVED", "UNSOLVED", "SKIPPED"],
+            },
+            riddleScore: {
+                type: Number,
+            },
         },
     ],
-    route:
-    {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Route",
-    },
-    riddleStatus: {
-        type: String,
-        enum: ["SOLVED", "UNSOLVED", "SKIPPED"],
-    },
     teamPics: [{
         type: String,
     }],
