@@ -26,6 +26,7 @@ const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
     const [deleteConfirm, setDeleteConfirm] = useState('');
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [activeFilters, setActiveFilters] = useState<{ route: string; language: string; numRiddles?: number | ""; favourite?: boolean }>({ route: '', language: '', numRiddles: '', favourite: false });
+    const [searchQuery, setSearchQuery] = useState<string>('');
 
     useEffect(() => {
         const fetch_data = async () => {
@@ -88,6 +89,12 @@ const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
                 if (Number(r.count) !== want) return false;
             }
 
+            // search prefix filter (case-insensitive)
+            if (searchQuery && String(searchQuery).trim() !== '') {
+                const q = String(searchQuery).trim().toLowerCase();
+                if (!String(r.name || '').toLowerCase().startsWith(q)) return false;
+            }
+
             // favourite filter
             if (activeFilters.favourite) {
                 if (!r.favourite) return false;
@@ -97,7 +104,7 @@ const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
         });
 
         setRows(filtered);
-    }, [rawRows, activeFilters]);
+    }, [rawRows, activeFilters, searchQuery]);
 
     // Helper for riddles table (for RouteTable)
     // You can pass rows[index].riddles to RouteTable as needed
@@ -148,6 +155,8 @@ const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
                         type="text"
                         placeholder={gameData?.searchPlaceholder}
                         className="pl-10 pr-4 py-1 border border-gray-300 rounded-lg w-64 max-[350px]:w-48 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
                 {/* Animate Showdown Button */}
