@@ -171,16 +171,84 @@ export const addRoute = async (req, res) => {
     }
 }
 export const updateFavourite = async (req, res) => {
+    try {
+        const { routeId } = req.body;
+        if (!routeId) {
+            return res.status(400).json({ success: false, message: 'routeId is required' });
+        }
+
+        // Find the route by routeId
+        const existing = await route.findById(routeId);
+        if (!existing) {
+            return res.status(404).json({ success: false, message: 'Route not found' });
+        }
+        // Toggle the favourite field
+        existing.favourite = !existing.favourite;
+        const updated = await existing.save();
+        console.log("Updated favourite status:", updated);
+
+        return res.status(200).json({ success: true, data: updated, message: 'Favourite status updated' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Error updating favourite', error: error.message });
+    }
 
 }
 export const updateStatus = async (req, res) => {
+    try {
+        const { routeId } = req.body;
+        if (!routeId) {
+            return res.status(400).json({ success: false, message: 'routeId is required' });
+        }
 
+        // Find the route by routeId
+        const existing = await route.findById(routeId);
+        if (!existing) {
+            return res.status(404).json({ success: false, message: 'Route not found' });
+        }
+        // Toggle the active field
+        existing.active = !existing.active;
+        const updated = await existing.save();
+        console.log("Updated active status:", updated);
+
+        return res.status(200).json({ success: true, data: updated, message: 'active status updated' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Error updating active', error: error.message });
+    }
 }
 export const updateSettings = async (req, res) => {
 
 }
 export const updateGearSettings = async (req, res) => {
+    try {
+        const payload = req.body || {};
+        const { _id, routeID, name, gearSettings } = payload;
 
+        if (!gearSettings || typeof gearSettings !== 'object') {
+            return res.status(400).json({ success: false, message: 'gearSettings object is required' });
+        }
+
+        // Find existing route by _id or by name/routeID
+        let existing = null;
+        if (_id) existing = await route.findById(_id);
+        else if (routeID) existing = await route.findOne({ name: routeID });
+        else if (name) existing = await route.findOne({ name });
+
+        if (!existing) return res.status(404).json({ success: false, message: 'Route not found' });
+        console.log("Existing route before gearSettings update:", existing);
+        // Merge gearSettings into existing route. Prefer nested map.gearSettings if present.
+        if (existing?.gearSettings && typeof existing?.gearSettings === 'object') {
+            existing.gearSettings = { ...(existing?.gearSettings || {}), ...gearSettings };
+        } else {
+            existing.gearSettings = { ...(existing.gearSettings || {}), ...gearSettings };
+        }
+
+        const saved = await existing.save();
+        console.log("Existing route before gearSettings update:", saved);
+        return res.status(200).json({ success: true, data: saved, message: 'Gear settings updated' });
+    } catch (error) {
+        console.error('updateGearSettings error', error);
+        return res.status(500).json({ success: false, message: 'Error updating gear settings', error: error.message });
+    }
 }
 export const updateRoute = async (req, res) => {
     try {
@@ -276,10 +344,58 @@ export const fetchRouteSettings = async (req, res) => {
     }
 }
 export const deleteRoute = async (req, res) => {
+    try {
+        const payload = req.body || {};
+        const routeId = payload._id || payload.routeId || req.query._id || req.query.routeId || payload.id;
 
+        if (!routeId) {
+            return res.status(400).json({ success: false, message: '_id (route id) is required' });
+        }
+
+        const existingRoute = await route.findById(routeId);
+        if (!existingRoute) return res.status(404).json({ success: false, message: 'Route not found' });
+
+        const riddlesCount = Array.isArray(existingRoute.riddle) ? existingRoute.riddle.length : 0;
+
+        // Delete the route document
+        await route.findByIdAndDelete(routeId);
+
+        return res.status(200).json({ success: true, message: 'Route deleted', data: { deletedId: routeId, riddlesDetached: riddlesCount } });
+    } catch (error) {
+        console.error('deleteRoute error', error);
+        return res.status(500).json({ success: false, message: 'Error deleting route', error: error.message });
+    }
 }
 export const deleteRiddle = async (req, res) => {
+    try {
+        // Accept riddle id from body or query
+        const payload = req.body || {};
+        const riddleId = payload._id || payload.riddleId || req.query._id || req.query.riddleId;
 
+        if (!riddleId) {
+            return res.status(400).json({ success: false, message: '_id (riddle id) is required' });
+        }
+
+        // Find the riddle
+        const existing = await riddle.findById(riddleId);
+        if (!existing) return res.status(404).json({ success: false, message: 'Riddle not found' });
+
+        // Remove references from any routes that include this riddle
+        const parentRoutes = await route.find({ riddle: riddleId });
+        for (const pr of parentRoutes) {
+            pr.riddle = (pr.riddle || []).filter(id => String(id) !== String(riddleId));
+            pr.numberOfItems = Array.isArray(pr.riddle) ? pr.riddle.length : 0;
+            await pr.save();
+        }
+
+        // Delete the riddle document
+        await riddle.findByIdAndDelete(riddleId);
+
+        return res.status(200).json({ success: true, message: 'Riddle deleted', data: { deletedId: riddleId, routesUpdated: parentRoutes.length } });
+    } catch (error) {
+        console.error('deleteRiddle error', error);
+        return res.status(500).json({ success: false, message: 'Error deleting riddle', error: error.message });
+    }
 }
 export const addRiddle = async (req, res) => {
     try {
@@ -465,5 +581,48 @@ export const editRiddle = async (req, res) => {
     }
 }
 export const duplicateRoute = async (req, res) => {
+    try {
+        const payload = req.body || {};
+        const routeId = payload._id || payload.routeId || payload.id || req.query._id || req.query.routeId;
 
+        if (!routeId) return res.status(400).json({ success: false, message: '_id (route id) is required' });
+
+        const existing = await route.findById(routeId).lean();
+        if (!existing) return res.status(404).json({ success: false, message: 'Route not found' });
+
+        // Prepare clone data
+        const clone = { ...existing };
+        // Remove mongoose-specific and identifying fields
+        delete clone._id;
+        delete clone.__v;
+        delete clone.createdAt;
+        delete clone.updatedAt;
+
+        // Generate a unique name: try "<name> duplicate", then "<name> duplicate 2", etc.
+        const baseSuffix = ' duplicate';
+        let candidateName = `${existing.name}${baseSuffix}`;
+        let counter = 1;
+        while (await route.findOne({ name: candidateName })) {
+            counter += 1;
+            candidateName = `${existing.name}${baseSuffix} ${counter}`;
+        }
+        clone.name = candidateName;
+
+        // Generate new admin and cheat codes
+        clone.adminCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        clone.cheatCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+        // Ensure booleans/defaults are set for new clone
+        clone.active = false;
+        clone.favourite = false;
+
+        // Use the route model to create and save (so middleware and defaults apply)
+        const newRoute = new route(clone);
+        const saved = await newRoute.save();
+
+        return res.status(201).json({ success: true, data: saved, message: 'Route duplicated' });
+    } catch (error) {
+        console.error('duplicateRoute error', error);
+        return res.status(500).json({ success: false, message: 'Error duplicating route', error: error.message });
+    }
 }

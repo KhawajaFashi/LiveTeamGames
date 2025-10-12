@@ -23,6 +23,7 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deleteIdx, setDeleteIdx] = useState<number | null>(null);
     const [deleteConfirm, setDeleteConfirm] = useState('');
+    const [deleteLoading, setDeleteLoading] = useState(false);
     // Change Type modal state
     const [changeTypeOpen, setChangeTypeOpen] = useState(false);
     const [changeCategory, setChangeCategory] = useState('Standard');
@@ -230,6 +231,17 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
         'End Location',
     ];
 
+    // Gear settings state (used in Settings modal)
+    const [gearArVideoTutorial, setGearArVideoTutorial] = useState('');
+    const [gearIntroVideo, setGearIntroVideo] = useState('');
+    const [gearOutroWinVideo, setGearOutroWinVideo] = useState('');
+    const [gearOutroLoseVideo, setGearOutroLoseVideo] = useState('');
+    const [gearStartText, setGearStartText] = useState('Are you ready to start your mission?');
+    const [gearEndText, setGearEndText] = useState("Well done, you've made it! Now, return to your starting point.");
+    const [gearEndLocationActive, setGearEndLocationActive] = useState(false);
+    const [gearEndLocationName, setGearEndLocationName] = useState('');
+    const [gearEndLocationCoordinates, setGearEndLocationCoordinates] = useState({ lat: '', lng: '' });
+
     // Media picker state
     const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
     const [mediaTarget, setMediaTarget] = useState<string | null>(null);
@@ -244,9 +256,14 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
     const handleMediaSelect = (file: any) => {
         if (!file) return;
         const src = file.src || '/profile.png';
+        // Map mediaTarget to gear / riddle fields
         if (mediaTarget === 'picture') setEditPicture(src);
         else if (mediaTarget === 'helpImage') setEditHelpImage(src);
         else if (mediaTarget === 'arImage') setEditArImageTarget(src);
+        else if (mediaTarget === 'arVideoTutorial') setGearArVideoTutorial(src);
+        else if (mediaTarget === 'introVideo') setGearIntroVideo(src);
+        else if (mediaTarget === 'outroWinVideo') setGearOutroWinVideo(src);
+        else if (mediaTarget === 'outroLoseVideo') setGearOutroLoseVideo(src);
         // clear target and close picker
         setMediaTarget(null);
         setMediaPickerOpen(false);
@@ -541,29 +558,49 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                     {/* Tab content */}
                                     {activeTab === 'Videos' && (
                                         <div className="grid grid-cols-1 gap-4 pb-33.5 mb-6">
-                                            <div>
-                                                <div className="font-medium">AR Tutorial Video</div>
-                                                <button type="button" className="text-[#009FE3] text-sm hover:underline" onClick={() => setMediaPickerOpen(true)}>
-                                                    Upload from media
-                                                </button>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <div className="font-medium">AR Tutorial Video</div>
+                                                    <button type="button" className="text-[#009FE3] text-sm hover:underline" onClick={() => openMediaPickerFor('arVideoTutorial')}>
+                                                        Upload from media
+                                                    </button>
+                                                </div>
+                                                {gearArVideoTutorial ? (
+                                                    <div className="ml-4 w-48 text-right text-sm text-gray-700">Selected: <a href={gearArVideoTutorial} target="_blank" rel="noreferrer" className="underline">preview</a></div>
+                                                ) : null}
                                             </div>
-                                            <div>
-                                                <div className="font-medium">Intro Video</div>
-                                                <button type="button" className="text-[#009FE3] text-sm hover:underline" onClick={() => setMediaPickerOpen(true)}>
-                                                    Upload from media
-                                                </button>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <div className="font-medium">Intro Video</div>
+                                                    <button type="button" className="text-[#009FE3] text-sm hover:underline" onClick={() => openMediaPickerFor('introVideo')}>
+                                                        Upload from media
+                                                    </button>
+                                                </div>
+                                                {gearIntroVideo ? (
+                                                    <div className="ml-4 w-48 text-right text-sm text-gray-700">Selected: <a href={gearIntroVideo} target="_blank" rel="noreferrer" className="underline">preview</a></div>
+                                                ) : null}
                                             </div>
-                                            <div>
-                                                <div className="font-medium">Outro Win Video</div>
-                                                <button type="button" className="text-[#009FE3] text-sm hover:underline" onClick={() => setMediaPickerOpen(true)}>
-                                                    Upload from media
-                                                </button>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <div className="font-medium">Outro Win Video</div>
+                                                    <button type="button" className="text-[#009FE3] text-sm hover:underline" onClick={() => openMediaPickerFor('outroWinVideo')}>
+                                                        Upload from media
+                                                    </button>
+                                                </div>
+                                                {gearOutroWinVideo ? (
+                                                    <div className="ml-4 w-48 text-right text-sm text-gray-700">Selected: <a href={gearOutroWinVideo} target="_blank" rel="noreferrer" className="underline">preview</a></div>
+                                                ) : null}
                                             </div>
-                                            <div>
-                                                <div className="font-medium">Outro Loose Video</div>
-                                                <button type="button" className="text-[#009FE3] text-sm hover:underline" onClick={() => setMediaPickerOpen(true)}>
-                                                    Upload from media
-                                                </button>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <div className="font-medium">Outro Lose Video</div>
+                                                    <button type="button" className="text-[#009FE3] text-sm hover:underline" onClick={() => openMediaPickerFor('outroLoseVideo')}>
+                                                        Upload from media
+                                                    </button>
+                                                </div>
+                                                {gearOutroLoseVideo ? (
+                                                    <div className="ml-4 w-48 text-right text-sm text-gray-700">Selected: <a href={gearOutroLoseVideo} target="_blank" rel="noreferrer" className="underline">preview</a></div>
+                                                ) : null}
                                             </div>
                                         </div>
                                     )}
@@ -585,7 +622,39 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                     )}
                                     {activeTab && (
                                         <div className='border-t border-gray-200 mt-6 pt-4 flex justify-end px-6'>
-                                            <button className="px-4 py-2 rounded bg-[#009FE3] text-white font-semibold hover:bg-[#007bb5]">Save Changes</button>
+                                            <button className="px-4 py-2 rounded bg-[#009FE3] text-white font-semibold hover:bg-[#007bb5]" onClick={async () => {
+                                                try {
+                                                    const payload: any = {
+                                                        routeID: routeID || routeID,
+                                                        gearSettings: {
+                                                            startText: gearStartText,
+                                                            endText: gearEndText,
+                                                            endLocation: {
+                                                                active: Boolean(gearEndLocationActive),
+                                                                name: gearEndLocationName,
+                                                                coordinates: {
+                                                                    lat: gearEndLocationCoordinates.lat ? Number(gearEndLocationCoordinates.lat) : 0,
+                                                                    lng: gearEndLocationCoordinates.lng ? Number(gearEndLocationCoordinates.lng) : 0,
+                                                                }
+                                                            },
+                                                            arVideoTutorial: gearArVideoTutorial,
+                                                            introVideo: gearIntroVideo,
+                                                            outroWinVideo: gearOutroWinVideo,
+                                                            outroLoseVideo: gearOutroLoseVideo,
+                                                        }
+                                                    };
+                                                    const res = await api.post('/games/update_gear_settings', payload);
+                                                    if (res.data && res.data.success) {
+                                                        // close modal and optionally show a success state
+                                                        console.log(res.data);
+                                                        setSettingsModalOpen(false);
+                                                    } else {
+                                                        console.error('Failed to update gear settings', res.data);
+                                                    }
+                                                } catch (err) {
+                                                    console.error('Error saving gear settings', err);
+                                                }
+                                            }}>Save Changes</button>
                                         </div>
                                     )}
                                 </div>
@@ -703,13 +772,38 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                                     <div className="flex items-center justify-center gap-2 my-4">
                                                         <button className="px-4 py-2 rounded bg-gray-100 text-gray-700 hover:bg-gray-200" onClick={() => setDeleteOpen(false)}>Cancel</button>
                                                         <button
-                                                            className={`px-4 py-2 rounded bg-[#009FE3] text-white font-semibold hover:bg-[#007bb5] ${deleteConfirm !== 'DELETE' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                            disabled={deleteConfirm !== 'DELETE'}
-                                                            onClick={() => {
-                                                                setRiddles(prev => prev.filter((_, idx) => idx !== deleteIdx));
-                                                                setDeleteOpen(false);
+                                                            className={`px-4 py-2 rounded bg-[#009FE3] text-white font-semibold hover:bg-[#007bb5] ${deleteConfirm !== 'DELETE' || deleteLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                            disabled={deleteConfirm !== 'DELETE' || deleteLoading}
+                                                            onClick={async () => {
+                                                                if (deleteIdx === null) return;
+                                                                if (deleteConfirm !== 'DELETE') return;
+                                                                const target = riddles[deleteIdx];
+                                                                const riddleId = (target as any)?._id || (target as any)?.id;
+                                                                if (!riddleId) {
+                                                                    // fallback: remove locally
+                                                                    setRiddles(prev => prev.filter((_, idx) => idx !== deleteIdx));
+                                                                    setDeleteOpen(false);
+                                                                    return;
+                                                                }
+                                                                try {
+                                                                    setDeleteLoading(true);
+                                                                    // axios delete with body: pass data in config
+                                                                    const res = await api.delete('/games/delete_riddle', { data: { _id: riddleId } });
+                                                                    if (res.data && res.data.success) {
+                                                                        setRiddles(prev => prev.filter(r => String((r as any)._id) !== String(riddleId)));
+                                                                        setDeleteOpen(false);
+                                                                    } else {
+                                                                        console.error('Delete failed', res.data);
+                                                                        // still remove locally to keep UX consistent? keep modal open to let user retry
+                                                                    }
+                                                                } catch (err) {
+                                                                    console.error('Error deleting riddle', err);
+                                                                } finally {
+                                                                    setDeleteLoading(false);
+                                                                    setDeleteConfirm('');
+                                                                }
                                                             }}
-                                                        >Yes, delete it!</button>
+                                                        >{deleteLoading ? 'Deleting...' : 'Yes, delete it!'}</button>
                                                     </div>
                                                 </div>
                                             </div>

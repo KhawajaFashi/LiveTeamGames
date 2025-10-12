@@ -11,9 +11,11 @@ interface RouteActionsMenuProps {
     onClose: () => void;
     gameID: string;
     routeID: string;
+    onDelete?: () => void;
+    onDuplicate?: () => void;
 }
 
-const RouteActionsMenu: React.FC<RouteActionsMenuProps> = ({ open, onOpen, onClose, gameID, routeID }) => {
+const RouteActionsMenu: React.FC<RouteActionsMenuProps> = ({ open, onOpen, onClose, gameID, routeID, onDelete, onDuplicate }) => {
     const router = useRouter();
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -32,6 +34,14 @@ const RouteActionsMenu: React.FC<RouteActionsMenuProps> = ({ open, onOpen, onClo
     const handleEdit = () => {
         router.push(`/games/new-route?gameID=${gameID}&routeID=${routeID}`);
         onClose();
+    };
+    const handleDelete = () => {
+        onClose();
+        if (onDelete) onDelete();
+    };
+    const handleDuplicate = () => {
+        onClose();
+        if (onDuplicate) onDuplicate();
     };
     // Dynamic menu position: open above if near bottom of viewport
     const [menuPosition, setMenuPosition] = React.useState<'bottom' | 'top'>('bottom');
@@ -62,11 +72,11 @@ const RouteActionsMenu: React.FC<RouteActionsMenuProps> = ({ open, onOpen, onClo
                         <FaRegEdit />
                         Edit Route
                     </button>
-                    <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2">
+                    <button onClick={handleDuplicate} className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2">
                         <HiOutlineDuplicate />
                         Duplicate Route
                     </button>
-                    <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-red-600">
+                    <button onClick={handleDelete} className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-red-600">
                         <MdDelete />
                         Delete Route
                     </button>

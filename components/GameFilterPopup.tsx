@@ -5,9 +5,11 @@ interface FilterPopupProps {
     isOpen: boolean;
     onClose: () => void;
     buttonRef: React.RefObject<HTMLDivElement | null>;
+    // callback to pass filters back to parent when Apply/Reset are used
+    onApply?: (filters: { route: string; language: string; numRiddles?: number | ""; favourite?: boolean }) => void;
 }
 
-const FilterPopup: React.FC<FilterPopupProps> = ({ isOpen, onClose, buttonRef }) => {
+const FilterPopup: React.FC<FilterPopupProps> = ({ isOpen, onClose, buttonRef, onApply }) => {
     const popupRef = useRef<HTMLDivElement>(null);
     const [filters, setFilters] = useState<{
         route: string;
@@ -16,7 +18,7 @@ const FilterPopup: React.FC<FilterPopupProps> = ({ isOpen, onClose, buttonRef })
         favourite?: boolean;
     }>({
         route: "",
-        language: "English",
+        language: "",
         numRiddles: "",
         favourite: false,
     });
@@ -80,6 +82,7 @@ const FilterPopup: React.FC<FilterPopupProps> = ({ isOpen, onClose, buttonRef })
                         value={filters.language}
                         onChange={(e) => setFilters({ ...filters, language: e.target.value })}
                     >
+                        <option value="">Any</option>
                         <option value="English">English</option>
                         <option value="German">German</option>
                         <option value="French">French</option>
@@ -123,18 +126,25 @@ const FilterPopup: React.FC<FilterPopupProps> = ({ isOpen, onClose, buttonRef })
             {/* Action Buttons */}
             <div className="flex justify-end space-x-3 pt-4">
                 <button
-                    onClick={() => setFilters({
-                        route: "",
-                        language: "English",
-                        numRiddles: "",
-                        favourite: false,
-                    })}
+                    onClick={() => {
+                        const cleared = {
+                            route: "",
+                            language: "",
+                            numRiddles: "" as "",
+                            favourite: false,
+                        };
+                        setFilters(cleared as any);
+                        if (onApply) onApply(cleared as any);
+                    }}
                     className="px-4 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
                 >
                     Reset
                 </button>
                 <button
-                    onClick={onClose}
+                    onClick={() => {
+                        if (onApply) onApply(filters as any);
+                        onClose();
+                    }}
                     className="px-3 py-1 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
                 >
                     Apply
