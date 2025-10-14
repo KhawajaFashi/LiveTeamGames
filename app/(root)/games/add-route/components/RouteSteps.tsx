@@ -72,6 +72,9 @@ const RouteSteps: React.FC<StepProps> = ({ step, totalSteps, routeType, gameId, 
                 })
             };
 
+            console.log("Template ID: ", templateId);
+            // console.log(templateId)
+
             const response = await api.post('/games/add_route', routeData);
 
             const data = response.data;
@@ -93,7 +96,6 @@ const RouteSteps: React.FC<StepProps> = ({ step, totalSteps, routeType, gameId, 
         }
 
     };
-
 
 
     return (

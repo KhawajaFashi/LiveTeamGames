@@ -92,7 +92,6 @@ export const addRoute = async (req, res) => {
             adminCode,
             cheatCode,
             whiteLabel: "",
-            highScore: `${gameName} Default`,
             numberOfItems: riddles ? riddles.length : 0,
 
             // Default settings

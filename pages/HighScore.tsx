@@ -48,7 +48,7 @@ interface Route {
 
 interface RouteWithTeams {
     route: Route;
-    teams: Team[] |[];
+    teams: Team[] | [];
 }
 
 interface HighScoresInterface {
@@ -64,7 +64,6 @@ interface HighScoreProps {
 const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
     const gameName = highScoreType || '';
     const [liveHighscores, setLiveHighscores] = useState<HighscoreRow[]>([]);
-    const [rawData, setRawData] = useState<HighScoresInterface[]>([]);
     const [menuOpenIdx, setMenuOpenIdx] = useState<number | null>(null);
     const [showModalIdx, setShowModalIdx] = useState<number | null>(null);
     const [showModalOpen, setShowModalOpen] = useState(false);
@@ -77,14 +76,9 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
     const [deleteIdx, setDeleteIdx] = useState<number | null>(null);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [addOpen, setAddOpen] = useState(false);
-    const [teams, setTeams] = useState<Team[]>([]);
     useEffect(() => {
         const fetch_data = async () => {
             const res = await api.get(`/highscore/fetch_data?gameName=${encodeURIComponent(gameName)}`);
-            // console.log(res.data.data);
-            if (res.data.success && res.data.data) {
-                setRawData(res.data.data);
-            }
             return res.data.data;
         }
         const fetchAll = async () => {
@@ -103,7 +97,8 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                 .flatMap((route: any) =>
                                     route.teams.map((team: any) => ({
                                         ...team.toObject?.() ?? team, // ensure plain object
-                                        routeName: route.route,       // attach route name
+                                        routeName: route.route as string,       // attach route name
+                                        StartedAt: new Date(team.StartedAt)
                                     }))
                                 )
                                 .map((team: any) => [team._id.toString(), team]) // unique by _id
@@ -111,9 +106,10 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                     ),
 
 
-                    
+
                     // teamCount: r.routes.flatMap((route: any) => route.teams).length,
                 }));
+
                 const routes = res.map((r: any) => r.routes);
                 const teamsData = routes.flatMap((routeArr: any) =>
                     routeArr.flatMap((r: any) => r.teams)
@@ -156,10 +152,12 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                     <td className="py-2 px-2 text-center">{row.gameName}</td>
                                     <td className="py-2 px-2 text-center">{row.name}</td>
                                     <td className="py-2 px-2 text-center">{row?.teams?.length}</td>
-                                    <td className="py-2 px-2 text-center">{new Date(row?.updatedAt).toISOString().split("T")[0]}</td>
+                                    <td className="py-2 px-2 text-center">{row?.updatedAt
+                                        ? new Date(row.updatedAt).toISOString().split("T")[0]
+                                        : "-"}</td>
                                     <td className="py-2 px-2 text-center relative">
                                         <button
-                                            ref={(el) => (actionAnchorRefs.current[idx] = el)}
+                                            ref={(el) => { actionAnchorRefs.current[idx] = el; }}
                                             className="text-gray-400 hover:text-gray-600 hover:bg-sky-500 rounded-[50%] p-1"
                                             onClick={() => {
                                                 if (menuOpenIdx === idx) setMenuOpenIdx(null);
@@ -196,7 +194,7 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                                 setDeleteOpen(true);
                                                 setMenuOpenIdx(null);
                                             }}
-                                            anchorRef={actionAnchorRefs[idx] as React.RefObject<HTMLButtonElement>}
+                                            anchorRef={{ current: actionAnchorRefs.current[idx] as HTMLButtonElement }}
                                         />
                                         {/* Show modal for teams */}
                                         {showModalOpen && showModalIdx === idx && (
@@ -204,7 +202,7 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                                 open={showModalOpen}
                                                 onClose={() => setShowModalOpen(false)}
                                                 highscoreName={row.name || "Highscore"}
-                                                teams={row.teams || []}
+                                                teams={row?.teams || []}
                                             />
                                         )}
                                         {/* Edit Name modal */}

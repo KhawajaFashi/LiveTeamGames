@@ -242,7 +242,7 @@ const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
                                     <input
                                         type="checkbox"
                                         checked={row.status || false}
-                                        onClick={async () => {
+                                        onChange={async () => {
                                             try {
                                                 // Send toggle request
                                                 const res = await api.post('/games/toggle_status', { routeId: row._id });

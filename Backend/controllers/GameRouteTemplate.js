@@ -50,6 +50,7 @@ export const getRouteTemplates = async (req, res) => {
             });
         }
         const templates = await routeTemplate.find({ gameName }).populate('riddles');
+        console.log(templates);
         res.status(200).json({
             success: true,
             data: templates

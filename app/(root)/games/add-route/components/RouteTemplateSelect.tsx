@@ -56,6 +56,7 @@ const RouteTemplateSelect: React.FC<RouteTemplateSelectProps> = ({
                 );
 
                 if (res.data.success) {
+                    console.log(res.data.data);
                     setTemplates(res.data.data);
                 } else {
                     setFetchError(res.data.message || "Failed to fetch templates");
@@ -69,6 +70,7 @@ const RouteTemplateSelect: React.FC<RouteTemplateSelectProps> = ({
 
         fetchTemplates();
     }, [gameName]);
+    console.log("Template ID: ",templateId);
 
 
     return (
@@ -94,7 +96,7 @@ const RouteTemplateSelect: React.FC<RouteTemplateSelectProps> = ({
                                 name="template"
                                 value={t._id}
                                 checked={templateId === t._id}
-                                onChange={(e) => { setTemplateId(e.target.value); setErrors((prev: ErrorState) => ({ ...prev, templateId: undefined })); }}
+                                onChange={(e) => { setTemplateId(e.target.value); setSelectedTemplate(t); setErrors((prev: ErrorState) => ({ ...prev, templateId: undefined })); }}
                                 className="mt-1"
                             />
                             <div>

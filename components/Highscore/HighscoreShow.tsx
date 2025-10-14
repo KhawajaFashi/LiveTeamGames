@@ -11,14 +11,14 @@ interface Team {
     status: string;
     phone: string;
     Battery: number;
-    StartedAt: Date;
+    StartedAt: Date | string;
     playingTime: string;
     timeLeft: string;
     createdAt: string;
     updatedAt: string;
     riddles: Record<string, any>[];
     route: Route[]; // populated routes
-    routeName: string;
+    routeName?: string;
     teamPics: any[];
     teamVids: any[];
     __v: number;
