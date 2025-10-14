@@ -23,7 +23,7 @@ export default async function HighScorePage({ searchParams }: HighScorePageProps
         <div className="h-full bg-[#f2f3f8] p-6">
 
             {/* Game Table */}
-            <HighScore highScoreData={highScoreData} />
+            <HighScore highScoreType={highScoreType} />
 
         </div>
     );

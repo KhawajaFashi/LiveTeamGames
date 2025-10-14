@@ -31,6 +31,11 @@ const TeamsSchema = new Schema({
         type: Number
     },
 
+    route: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "route",
+    }],
+
     riddles: [
         {
             riddle: {

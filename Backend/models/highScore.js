@@ -13,12 +13,6 @@ const highScoreSchema = new Schema({
         type: Boolean,
         required: true,
     },
-    teams: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "team",
-        },
-    ],
 
 }, { timestamps: true })
 

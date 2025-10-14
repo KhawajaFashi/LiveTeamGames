@@ -92,6 +92,7 @@ export const addRoute = async (req, res) => {
             adminCode,
             cheatCode,
             whiteLabel: "",
+            highScore: `${gameName} Default`,
             numberOfItems: riddles ? riddles.length : 0,
 
             // Default settings
@@ -255,6 +256,8 @@ export const updateRoute = async (req, res) => {
         const payload = req.body || {};
         const { _id, routeID, name } = payload;
 
+        // console.log(payload);
+
         // Find existing route by _id or by name/routeID
         let existing = null;
         if (_id) existing = await route.findById(_id);
@@ -266,7 +269,7 @@ export const updateRoute = async (req, res) => {
         }
 
         // Allowed top-level updatable fields
-        const updatable = ['name', 'playingTime', 'numberOfItems', 'cheatCode', 'adminCode', 'lang', 'active', 'favourite', 'description', 'whiteLabel'];
+        const updatable = ['name', 'playingTime', 'numberOfItems', 'highScore', 'cheatCode', 'adminCode', 'lang', 'active', 'favourite', 'description', 'whiteLabel'];
 
         updatable.forEach(key => {
             if (Object.prototype.hasOwnProperty.call(payload, key)) {
@@ -321,7 +324,7 @@ export const fetchRouteSettings = async (req, res) => {
         else found = await route.findOne({ name: routeName }).lean();
 
         if (!found) return res.status(404).json({ success: false, message: 'Route not found' });
-
+        console.log("\n\n\n\n\nfound", found.highScore);
         // return only the settings sections that the front-end cares about
         const settings = {
             name: found.name,
@@ -329,6 +332,7 @@ export const fetchRouteSettings = async (req, res) => {
             numberOfItems: found.numberOfItems,
             cheatCode: found.cheatCode,
             adminCode: found.adminCode,
+            highScore: found.highScore,
             whiteLabel: found.whiteLabel || { defaultStatus: false, path: "" },
             lang: found.lang,
             general: found.general || {},

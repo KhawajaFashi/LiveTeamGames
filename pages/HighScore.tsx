@@ -6,27 +6,69 @@ import HighscoreEditName from "../components/Highscore/HighscoreEditName";
 import HighscoreReset from "../components/Highscore/HighscoreReset";
 import HighscoreDelete from "../components/Highscore/HighscoreDelete";
 import HighscoreAdd from "../components/Highscore/HighscoreAdd";
+import api from "@/utils/axios";
 
 interface HighscoreRow {
-    game?: string;
+    _id?: string;
+    gameName?: string;
     name?: string;
-    teams?: number | string;
-    lastEdited?: string;
-    savedHighscore?: string | number;
+    updatedAt?: string;
+    saved?: string | number;
+    teams?: Team[] | [];
 }
 
+interface Team {
+    _id: string;
+    name: string;
+    gameName: string;
+    score: number;
+    status: string;
+    phone: string;
+    Battery: number;
+    StartedAt: string;
+    playingTime: string;
+    timeLeft: string;
+    createdAt: string;
+    updatedAt: string;
+    riddles: Record<string, any>[];
+    route: Route[]; // populated routes
+    routeName?: string;
+    teamPics: any[];
+    teamVids: any[];
+    __v: number;
+    coordinates: {
+        type: string;
+        coordinates: [number, number];
+    };
+}
+interface Route {
+    _id: string;
+    name: string;
+}
+
+interface RouteWithTeams {
+    route: Route;
+    teams: Team[] |[];
+}
+
+interface HighScoresInterface {
+    highScore: HighscoreRow;
+    routes: RouteWithTeams[] | [];
+}
 const savedHighscores: HighscoreRow[] = [];
 
 interface HighScoreProps {
-    highScoreData?: { rows?: HighscoreRow[] };
+    highScoreType?: string | '';
 }
 
-const HighScore: React.FC<HighScoreProps> = ({ highScoreData }) => {
-    const [liveHighscores, setLiveHighscores] = useState<HighscoreRow[]>(highScoreData?.rows || []);
+const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
+    const gameName = highScoreType || '';
+    const [liveHighscores, setLiveHighscores] = useState<HighscoreRow[]>([]);
+    const [rawData, setRawData] = useState<HighScoresInterface[]>([]);
     const [menuOpenIdx, setMenuOpenIdx] = useState<number | null>(null);
     const [showModalIdx, setShowModalIdx] = useState<number | null>(null);
     const [showModalOpen, setShowModalOpen] = useState(false);
-    const actionAnchorRefs = liveHighscores.map(() => useRef<HTMLButtonElement>(null));
+    const actionAnchorRefs = useRef<(HTMLButtonElement | null)[]>([]);
     const [editNameIdx, setEditNameIdx] = useState<number | null>(null);
     const [editNameOpen, setEditNameOpen] = useState(false);
     const [editNameValue, setEditNameValue] = useState("");
@@ -35,25 +77,60 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreData }) => {
     const [deleteIdx, setDeleteIdx] = useState<number | null>(null);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [addOpen, setAddOpen] = useState(false);
-    const demoTeams = [
-        { no: 1, teamName: "Nannybashers", routeName: "DR5", score: 0, status: "PLAYING", time: "73 h 3 m", startedOn: "01.10.2025" },
-        { no: 2, teamName: "The dingy riders", routeName: "DR5", score: 6000, status: "PLAYING", time: "73 h 5 m", startedOn: "01.10.2025" },
-        { no: 3, teamName: "Quandeldingle", routeName: "DR3", score: 3000, status: "PLAYING", time: "73 h 8 m", startedOn: "01.10.2025" },
-        { no: 4, teamName: "Billy bob joe 67", routeName: "DR4", score: 1000, status: "PLAYING", time: "73 h 8 m", startedOn: "01.10.2025" },
-        { no: 5, teamName: "Dudes", routeName: "DR6", score: 8100, status: "PLAYING", time: "73 h 11 m", startedOn: "01.10.2025" },
-        { no: 5, teamName: "Dudes", routeName: "DR6", score: 8100, status: "PLAYING", time: "73 h 11 m", startedOn: "01.10.2025" },
-        { no: 5, teamName: "Dudes", routeName: "DR6", score: 8100, status: "PLAYING", time: "73 h 11 m", startedOn: "01.10.2025" },
-        { no: 5, teamName: "Dudes", routeName: "DR6", score: 8100, status: "PLAYING", time: "73 h 11 m", startedOn: "01.10.2025" },
-        { no: 5, teamName: "Dudes", routeName: "DR6", score: 8100, status: "PLAYING", time: "73 h 11 m", startedOn: "01.10.2025" },
-        { no: 5, teamName: "Dudes", routeName: "DR6", score: 8100, status: "PLAYING", time: "73 h 11 m", startedOn: "01.10.2025" },
-        { no: 5, teamName: "Dudes", routeName: "DR6", score: 8100, status: "PLAYING", time: "73 h 11 m", startedOn: "01.10.2025" },
-        { no: 5, teamName: "Dudes", routeName: "DR6", score: 8100, status: "PLAYING", time: "73 h 11 m", startedOn: "01.10.2025" },
-        { no: 5, teamName: "Dudes", routeName: "DR6", score: 8100, status: "PLAYING", time: "73 h 11 m", startedOn: "01.10.2025" },
-        { no: 5, teamName: "Dudes", routeName: "DR6", score: 8100, status: "PLAYING", time: "73 h 11 m", startedOn: "01.10.2025" },
-    ];
+    const [teams, setTeams] = useState<Team[]>([]);
     useEffect(() => {
-        setLiveHighscores(highScoreData?.rows ?? []);
-    }, [highScoreData?.rows]);
+        const fetch_data = async () => {
+            const res = await api.get(`/highscore/fetch_data?gameName=${encodeURIComponent(gameName)}`);
+            // console.log(res.data.data);
+            if (res.data.success && res.data.data) {
+                setRawData(res.data.data);
+            }
+            return res.data.data;
+        }
+        const fetchAll = async () => {
+            const res = await fetch_data(); // ✅ await the promise
+            console.log("Response", res)
+            if (res) {
+                const highScores: HighscoreRow[] = res.map((r: any) => ({
+                    _id: r.highScore._id,
+                    gameName: r.highScore.gameName,
+                    name: r.highScore.name,
+                    updatedAt: r.highScore.updatedAt,
+                    saved: r.highScore.value,
+                    teams: Array.from(
+                        new Map(
+                            r.routes
+                                .flatMap((route: any) =>
+                                    route.teams.map((team: any) => ({
+                                        ...team.toObject?.() ?? team, // ensure plain object
+                                        routeName: route.route,       // attach route name
+                                    }))
+                                )
+                                .map((team: any) => [team._id.toString(), team]) // unique by _id
+                        ).values()
+                    ),
+
+
+                    
+                    // teamCount: r.routes.flatMap((route: any) => route.teams).length,
+                }));
+                const routes = res.map((r: any) => r.routes);
+                const teamsData = routes.flatMap((routeArr: any) =>
+                    routeArr.flatMap((r: any) => r.teams)
+                );
+
+                setLiveHighscores(highScores);
+                // setTeams(teamsData);
+
+                console.log("HighScores", highScores[0]?.teams);
+                // console.log("Teams", teamsData);
+            }
+        };
+
+        fetchAll();
+        // setLiveHighscores();
+        // setLiveHighscores(highScoreData?.rows ?? []);
+    }, [gameName]);
     {/* Live Highscore Section */ }
     return (
         <div>
@@ -76,19 +153,17 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreData }) => {
                         <tbody>
                             {liveHighscores.map((row: HighscoreRow, idx: number) => (
                                 <tr key={idx} className={idx % 2 === 1 ? "bg-[#f7f8fa]" : ""}>
-                                    <td className="py-2 px-2 text-center">{row.game}</td>
+                                    <td className="py-2 px-2 text-center">{row.gameName}</td>
                                     <td className="py-2 px-2 text-center">{row.name}</td>
-                                    <td className="py-2 px-2 text-center">{row.teams}</td>
-                                    <td className="py-2 px-2 text-center">{row.lastEdited}</td>
+                                    <td className="py-2 px-2 text-center">{row?.teams?.length}</td>
+                                    <td className="py-2 px-2 text-center">{new Date(row?.updatedAt).toISOString().split("T")[0]}</td>
                                     <td className="py-2 px-2 text-center relative">
                                         <button
-                                            ref={actionAnchorRefs[idx]}
+                                            ref={(el) => (actionAnchorRefs.current[idx] = el)}
                                             className="text-gray-400 hover:text-gray-600 hover:bg-sky-500 rounded-[50%] p-1"
                                             onClick={() => {
-                                                if (menuOpenIdx === idx) {
-                                                    setMenuOpenIdx(null);
-                                                } else
-                                                    setMenuOpenIdx(idx);
+                                                if (menuOpenIdx === idx) setMenuOpenIdx(null);
+                                                else setMenuOpenIdx(idx);
                                             }}
                                         >
                                             <svg className="w-4 h-4 hover:text-white text-gray-400" fill="currentColor" viewBox="0 0 24 24">
@@ -129,7 +204,7 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreData }) => {
                                                 open={showModalOpen}
                                                 onClose={() => setShowModalOpen(false)}
                                                 highscoreName={row.name || "Highscore"}
-                                                teams={demoTeams}
+                                                teams={row.teams || []}
                                             />
                                         )}
                                         {/* Edit Name modal */}
@@ -178,7 +253,7 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreData }) => {
                 <HighscoreAdd
                     open={addOpen}
                     onClose={() => setAddOpen(false)}
-                    gameName={liveHighscores[0]?.game || "Game1"}
+                    gameName={liveHighscores[0]?.gameName || "Game1"}
                     onAdd={() => {
                         // setLiveHighscores(prev => [
                         //     ...prev,
@@ -218,10 +293,10 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreData }) => {
                             ) : (
                                 savedHighscores.map((row: HighscoreRow, idx: number) => (
                                     <tr key={idx}>
-                                        <td className="py-2 px-2 text-center">{row.game}</td>
+                                        <td className="py-2 px-2 text-center">{row.gameName}</td>
                                         <td className="py-2 px-2 text-center">{row.name}</td>
-                                        <td className="py-2 px-2 text-center">{row.teams}</td>
-                                        <td className="py-2 px-2 text-center">{row.savedHighscore}</td>
+                                        <td className="py-2 px-2 text-center">{row.updatedAt}</td>
+                                        <td className="py-2 px-2 text-center">{row.saved}</td>
                                         <td className="py-2 px-2 text-center">
                                             <button className="text-gray-400 hover:text-gray-600">
                                                 <span className="font-bold text-xl">...</span>

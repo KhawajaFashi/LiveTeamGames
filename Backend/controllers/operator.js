@@ -71,6 +71,7 @@ export const addTeam = async (req, res) => {
             route: route || null,
             phone: phone || '',
             status: payload.status || 'PLAY',
+            route: payload.route,
             timeLeft: payload.timeLeft || '',
             Battery: payload.Battery ?? payload.battery ?? 0,
             StartedAt: payload.StartedAt ?? Date.now(),

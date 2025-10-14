@@ -1,24 +1,43 @@
 import React from "react";
 
-interface TeamRow {
-    no: number;
-    teamName: string;
-    routeName: string;
+interface Route {
+    _id: string;
+}
+interface Team {
+    _id: string;
+    name: string;
+    gameName: string;
     score: number;
     status: string;
-    time: string;
-    startedOn: string;
+    phone: string;
+    Battery: number;
+    StartedAt: Date;
+    playingTime: string;
+    timeLeft: string;
+    createdAt: string;
+    updatedAt: string;
+    riddles: Record<string, any>[];
+    route: Route[]; // populated routes
+    routeName: string;
+    teamPics: any[];
+    teamVids: any[];
+    __v: number;
+    coordinates: {
+        type: string;
+        coordinates: [number, number];
+    };
 }
 
 interface HighscoreShowProps {
     open: boolean;
     onClose: () => void;
     highscoreName: string;
-    teams: TeamRow[];
+    teams: Team[] | [];
 }
 
 const HighscoreShow: React.FC<HighscoreShowProps> = ({ open, onClose, highscoreName, teams }) => {
     if (!open) return null;
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.2)]">
             <div className="bg-white rounded-lg shadow-lg w-[700px] max-w-full p-8 relative">
@@ -44,14 +63,14 @@ const HighscoreShow: React.FC<HighscoreShowProps> = ({ open, onClose, highscoreN
                         </thead>
                         <tbody>
                             {teams.map((team, idx) => (
-                                <tr key={team.no} className={idx % 2 === 1 ? "bg-[#f7f8fa]" : ""}>
-                                    <td className="py-2 px-2 text-center">{team.no}</td>
-                                    <td className="py-2 px-2 text-center">{team.teamName}</td>
+                                <tr key={team._id} className={idx % 2 === 1 ? "bg-[#f7f8fa]" : ""}>
+                                    <td className="py-2 px-2 text-center">{idx+1}</td>
+                                    <td className="py-2 px-2 text-center">{team.name}</td>
                                     <td className="py-2 px-2 text-center">{team.routeName}</td>
                                     <td className="py-2 px-2 text-center">{team.score}</td>
                                     <td className="py-2 px-2 text-center">{team.status}</td>
-                                    <td className="py-2 px-2 text-center">{team.time}</td>
-                                    <td className="py-2 px-2 text-center">{team.startedOn}</td>
+                                    <td className="py-2 px-2 text-center">{team.timeLeft}</td>
+                                    <td className="py-2 px-2 text-center">{new Date(team.StartedAt).toISOString().split("T")[0]}</td>
                                 </tr>
                             ))}
                         </tbody>

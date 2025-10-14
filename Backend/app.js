@@ -51,7 +51,7 @@ app.use(
 app.use('/user', checkAuth, userRouter);
 app.use('/games', checkAuth, gameRouter);
 app.use('/operator', checkAuth, operatorRouter);
-app.use('/highScore', checkAuth, scoreRouter);
+app.use('/highscore', checkAuth, scoreRouter);
 // setRoutes(app); 
 
 app.get('/', checkAuth, (req, res) => {

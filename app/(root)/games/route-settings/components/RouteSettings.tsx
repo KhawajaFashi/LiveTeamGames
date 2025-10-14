@@ -4,6 +4,15 @@ import { useSearchParams } from 'next/navigation';
 import api from '@/utils/axios';
 import MediaPicker from '@/components/MediaPicker';
 import { useRouter } from 'next/navigation';
+import HighScore from '../../../../../pages/HighScore';
+
+interface HighscoreRow {
+    _id?: string;
+    game?: string;
+    name?: string;
+    lastEdited?: string;
+    saved?: string | number;
+}
 
 const RouteSettings = () => {
     // Get routeID and gameID from URL
@@ -11,6 +20,7 @@ const RouteSettings = () => {
     const routeID = searchParams?.get('routeID') || '';
     const gameID = searchParams?.get('gameID') || '';
     const router = useRouter();
+    const [highscoresArray, setHighscoresArray] = useState<HighscoreRow[]>([]);
 
     const [routeIdShow, setRouteIdShow] = useState(false);
     // General state
@@ -39,6 +49,7 @@ const RouteSettings = () => {
                     setPlayingTime(s.playingTime || '');
                     setNumItems(s.numberOfItems ? String(s.numberOfItems) : '0');
                     setCheatCode(s.cheatCode || '');
+                    setHighscore(s.highScore || '');
                     // Admin code presence -> use default unchecked (heuristic)
                     setAdminCode(s.adminCode);
                     // populate general flags and paths
@@ -109,6 +120,7 @@ const RouteSettings = () => {
             }
         }
         fetchSettings();
+        fetch_data();
     }, [routeID]);
 
     // Highscore
@@ -160,6 +172,14 @@ const RouteSettings = () => {
     // Team Registration
     const [customTeamIconsDefault, setCustomTeamIconsDefault] = useState(true);
 
+    const fetch_data = async () => {
+        const res = await api.get(`/highscore/fetch_data?gameName=${encodeURIComponent(gameID)}`);
+        console.log(res.data.data);
+        if (res.data.success && res.data.data) {
+            setHighscoresArray(res.data.data);
+        }
+    }
+
     const onSave = async () => {
         setSaving(true);
         setMessage(null);
@@ -185,6 +205,7 @@ const RouteSettings = () => {
                     { defaultStatus: !mapHelpImageThreeDefault, path: mapHelpImageThreePath },
                 ]
             };
+            console.log(highscore);
 
             const payload: any = {
                 routeID: routeID,
@@ -193,6 +214,7 @@ const RouteSettings = () => {
                 numberOfItems: Number(numItems),
                 cheatCode: cheatCode,
                 adminCode: adminCode,
+                highScore: highscore,
                 whiteLabel: { defaultStatus: !whiteLabelDefault, path: whiteLabelPath },
                 general,
                 map,
@@ -218,6 +240,7 @@ const RouteSettings = () => {
                     setCheatCode(s.cheatCode || '');
                     setAdminCode(s.adminCode || '');
                     setWhiteLabelPath(s.whiteLabelPath || '');
+                    setHighscore(s.HighScore);
 
                     const bgm = s.general?.backgroundMusic || {};
                     setBackgroundMusicPath(bgm.path || '');
@@ -344,9 +367,11 @@ const RouteSettings = () => {
                         {/* <div> */}
                         <label className="block text-gray-700 font-medium mb-1">Connected Highscore :</label>
                         <select className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={highscore} onChange={e => setHighscore(e.target.value)}>
-                            <option>Game1 (Default)</option>
-                            <option>Game2</option>
-                            <option>Other</option>
+                            {highscoresArray.map((h) => (
+                                <option key={h._id} value={h._id}>
+                                    {h.name}
+                                </option>
+                            ))}
                         </select>
                         {/* </div> */}
                     </div>

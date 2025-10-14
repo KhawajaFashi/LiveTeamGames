@@ -50,6 +50,7 @@ const RouteSteps: React.FC<StepProps> = ({ step, totalSteps, routeType, gameId, 
         const ok = validateCurrent();
         if (!ok) return;
 
+        console.log(selectedTemplate);
         if (step < totalSteps) {
             // clear step-specific errors when moving on
             setErrors({});
