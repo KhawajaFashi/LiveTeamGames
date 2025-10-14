@@ -70,6 +70,8 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
 
     // Riddle table state
     const [riddles, setRiddles] = useState<Riddle[]>([]);
+    // Anchor refs for action menus
+    const menuAnchorRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
 
     // Fetch riddles for this route from backend
     useEffect(() => {
@@ -557,7 +559,7 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                     </div>
                                     {/* Tab content */}
                                     {activeTab === 'Videos' && (
-                                        <div className="grid grid-cols-1 gap-4 pb-33.5 mb-6">
+                                        <div className="grid grid-cols-1 gap-4 items-start h-[50vh] mb-6">
                                             <div className="flex items-center justify-between">
                                                 <div>
                                                     <div className="font-medium">AR Tutorial Video</div>
@@ -621,7 +623,7 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                         </div>
                                     )}
                                     {activeTab && (
-                                        <div className='border-t border-gray-200 mt-6 pt-4 flex justify-end px-6'>
+                                        <div className='border-t border-gray-200 pt-4 flex justify-end px-6'>
                                             <button className="px-4 py-2 rounded bg-[#009FE3] text-white font-semibold hover:bg-[#007bb5]" onClick={async () => {
                                                 try {
                                                     const payload: any = {
@@ -697,6 +699,13 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                 <td className="px-6 py-2 text-sm text-gray-900">{riddle.episode}</td>
                                 <td className="px-6 py-2 text-sm text-gray-900">{riddle.type}</td>
                                 <td className="px-6 py-2 relative">
+                                    <button
+                                        ref={el => {
+                                            if (!menuAnchorRefs.current) return;
+                                            menuAnchorRefs.current[idx] = el;
+                                        }}
+                                        style={{ display: 'none' }}
+                                    />
                                     <RouteActionsMenu
                                         open={menuOpenIdx === idx}
                                         onOpen={() => setMenuOpenIdx(idx)}
@@ -706,6 +715,7 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                         onEdit={() => { setMenuOpenIdx(null); handleEditRiddle(idx); }}
                                         onChangeType={() => { setMenuOpenIdx(null); openChangeType(idx); }}
                                         onDelete={() => { setMenuOpenIdx(null); setDeleteOpen(true); setDeleteIdx(idx); setDeleteConfirm(''); }}
+                                        anchorRef={menuAnchorRefs.current && menuAnchorRefs.current[idx] ? { current: menuAnchorRefs.current[idx] as HTMLButtonElement } : undefined}
                                     />
                                     {/* Change Type Modal */}
                                     {changeTypeOpen && changeIdx === idx && (

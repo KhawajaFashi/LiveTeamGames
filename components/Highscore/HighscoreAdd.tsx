@@ -11,31 +11,33 @@ const HighscoreAdd: React.FC<HighscoreAddProps> = ({ open, onClose, onAdd, gameN
     const [name, setName] = useState("");
     if (!open) return null;
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.2)]">
-            <div className="bg-white rounded-lg shadow-lg w-[400px] max-w-full p-8 relative">
-                <button className="absolute top-4 right-6 text-gray-400 text-2xl" onClick={onClose}>×</button>
-                <h2 className="text-2xl font-bold mb-6">{gameName}</h2>
-                <div className="mb-6">
-                    <label className="block mb-2 font-medium text-gray-700">
-                        Highscore Name <span className="text-red-500">*</span> :
-                    </label>
-                    <input
-                        type="text"
-                        className="border px-3 py-2 rounded w-full"
-                        value={name}
-                        onChange={e => setName(e.target.value)}
-                    />
-                </div>
-                <div className="flex justify-end gap-2">
-                    <button className="px-4 py-2 bg-gray-100 rounded" onClick={onClose}>Close</button>
-                    <button
-                        className={`px-4 py-2 bg-[#00A3FF] text-white rounded ${name.trim() ? '' : 'opacity-50 cursor-not-allowed'}`}
-                        disabled={!name.trim()}
-                        onClick={() => onAdd(name)}
-                    >Add Highscore</button>
+        
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.4)]">
+                <div className="bg-white rounded-lg shadow-lg w-[30%] p-6 relative">
+                    <div className="border-b border-gray-200 mb-10">
+                        <button className="absolute top-3 right-4 text-gray-400 text-xl" onClick={onClose}>
+                            ×
+                        </button>
+                        <h2 className="text-lg font-semibold mb-7 capitalize">{ gameName}</h2>
+                    </div>
+                    <div className="flex flex-col gap-6 border-b border-gray-200 pb-10">
+                        <div className="flex gap-2 items-center ">
+                            <label className="font-medium mb-1 mr-6">HighScore Name <span className="text-red-600">*</span> :</label>
+                            <input
+                                type="text"
+                                className="border border-gray-200 px-3 py-1 rounded flex-1 focus:outline-none focus:border-blue-500"
+                                placeholder="HighScore name"
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="flex justify-end gap-2 mt-8">
+                        <button className="px-4 py-1 bg-gray-100 rounded" onClick={onClose}>Close</button>
+                        <button className="px-4 py-1 bg-[#00A3FF] text-white rounded" onClick={() => onAdd(name)}>Edit Name</button>
+                    </div>
                 </div>
             </div>
-        </div>
     );
 };
 

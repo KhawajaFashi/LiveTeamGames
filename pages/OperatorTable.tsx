@@ -59,6 +59,8 @@ const OperatorTable: React.FC<OperatorTableProps> = ({ OperatorData, operatorTyp
     const filterButtonRef = useRef<HTMLDivElement | null>(null);
 
     const [menuOpenIdx, setMenuOpenIdx] = useState<number | null>(null);
+    // Anchor refs for action menus
+    const menuAnchorRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
     const [showTeamDetailsIdx, setShowTeamDetailsIdx] = useState<number | null>(null);
     const [activeView, setActiveView] = useState<ActiveView>(null);
     const [editTeamName, setEditTeamName] = useState<string>("");
@@ -297,18 +299,13 @@ const OperatorTable: React.FC<OperatorTableProps> = ({ OperatorData, operatorTyp
                 />
             )}
             {/* Main Content */}
-            <div className="flex max-lg:flex-col gap-6 h-100">
+            <div className="flex max-lg:flex-col gap-6 h-100 max-sm:h-250">
                 {/* Map Section */}
                 <div className="w-[40%] max-lg:w-full h-full bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
-                    {/* <div className="p-2 border-b border-gray-200">
-                       
-                    </div> */}
-                    <div>
-                        <Map teams={teams} selectedTeamNo={selectedTeam} />
-                    </div>
+                    <Map teams={teams} selectedTeamNo={selectedTeam} />
                 </div>
                 {/* Table Section */}
-                <div className="w-[60%] max-lg:w-full bg-white rounded-lg h-100 shadow-sm overflow-auto">
+                <div className="w-[60%] max-lg:w-full bg-white rounded-lg h-full shadow-sm overflow-auto">
                     <table className="w-full text-[12px] overflow-auto">
                         <thead className="bg-[#000f24] text-white">
                             <tr>
@@ -350,6 +347,13 @@ const OperatorTable: React.FC<OperatorTableProps> = ({ OperatorData, operatorTyp
                                     </td>
                                     <td className="px-2 py-2 text-center">{team.startedOn ? new Date(team.startedOn).toLocaleDateString() : '-'}</td>
                                     <td className="px-2 py-2 text-center relative">
+                                        <button
+                                            ref={el => {
+                                                if (!menuAnchorRefs.current) return;
+                                                menuAnchorRefs.current[index] = el;
+                                            }}
+                                            style={{ display: 'none' }}
+                                        />
                                         <OperatorActionsMenu
                                             open={menuOpenIdx === index}
                                             onOpen={() => setMenuOpenIdx(index)}
@@ -360,7 +364,7 @@ const OperatorTable: React.FC<OperatorTableProps> = ({ OperatorData, operatorTyp
                                             onEditTeamName={() => { setShowTeamDetailsIdx(index); setEditTeamName(displayedTeams[index]?.teamName || ''); setActiveView('edit'); setMenuOpenIdx(null); }}
                                             onShowTeamInfo={() => { setShowTeamDetailsIdx(index); setActiveView('info'); setMenuOpenIdx(null); }}
                                             onDeleteTeam={() => { setShowTeamDetailsIdx(index); setActiveView('delete'); setMenuOpenIdx(null); }}
-                                        // Add similar handlers for videos, edit name, info, delete
+                                            anchorRef={menuAnchorRefs.current ? { current: menuAnchorRefs.current[index] } : undefined}
                                         />
                                     </td>
                                 </tr>

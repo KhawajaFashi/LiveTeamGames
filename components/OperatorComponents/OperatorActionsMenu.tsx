@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from "react-dom";
 import { FaRegEdit } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
@@ -14,6 +15,7 @@ interface OperatorActionsMenuProps {
     onEditTeamName?: () => void;
     onShowTeamInfo?: () => void;
     onDeleteTeam?: () => void;
+    anchorRef?: React.RefObject<HTMLButtonElement | null> | null;
 }
 
 const OperatorActionsMenu: React.FC<OperatorActionsMenuProps> = ({
@@ -25,9 +27,11 @@ const OperatorActionsMenu: React.FC<OperatorActionsMenuProps> = ({
     onTeamVideos,
     onEditTeamName,
     onShowTeamInfo,
-    onDeleteTeam
+    onDeleteTeam,
+    anchorRef
 }) => {
     const menuRef = useRef<HTMLDivElement>(null);
+    const [coords, setCoords] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
     useEffect(() => {
         if (!open) return;
@@ -42,32 +46,28 @@ const OperatorActionsMenu: React.FC<OperatorActionsMenuProps> = ({
         };
     }, [open, onClose]);
 
-    // Dynamic menu position: open above if near bottom of viewport
-    const [menuPosition, setMenuPosition] = React.useState<'bottom' | 'top'>('bottom');
-
-    React.useEffect(() => {
-        if (open && menuRef.current) {
-            const rect = menuRef.current.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - rect.bottom;
-            if (spaceBelow < 280) { // menu height approx
-                setMenuPosition('top');
-            } else {
-                setMenuPosition('bottom');
-            }
+    useEffect(() => {
+        if (open && anchorRef?.current) {
+            const rect = anchorRef.current.getBoundingClientRect();
+            setCoords({
+                top: rect.bottom + window.scrollY - 5,
+                left: rect.left - 150,
+            });
         }
-    }, [open]);
+    }, [open, anchorRef]);
 
     return (
-        <div className="relative" ref={menuRef}>
-            <button onClick={open ? onClose : onOpen} className="text-gray-400 hover:text-gray-600 hover:bg-sky-500 rounded-[50%] p-1">
+        <>
+            <button onClick={open ? onClose : onOpen} className="text-gray-400 hover:text-gray-600 hover:bg-sky-500 rounded-[50%] p-1" ref={anchorRef}>
                 <svg className="w-4 h-4 hover:text-white text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 12c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2zm8 0c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2zm8 0c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2z" />
                 </svg>
             </button>
-            {open && (
+            {open && createPortal(
                 <div
-                    className={`absolute right-0 w-40 mr-8 mt-0 text-[13px] bg-white border rounded border-none shadow-[0px_-1px_3px_1px_rgba(0,0,0,0.3)] z-10`}
-                    style={menuPosition === 'top' ? { bottom: '100%', marginBottom: '8px' } : { top: '100%', marginTop: '8px' }}
+                    ref={menuRef}
+                    className="absolute w-40 text-[13px] bg-white border rounded border-none shadow-[0px_-1px_3px_1px_rgba(0,0,0,0.3)] z-100"
+                    style={{ top: coords.top, left: coords.left }}
                 >
                     <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2" onClick={onTeamDetails}>
                         <AiOutlineInfoCircle />
@@ -93,9 +93,10 @@ const OperatorActionsMenu: React.FC<OperatorActionsMenuProps> = ({
                         <MdDelete />
                         Delete Team
                     </button>
-                </div>
+                </div>,
+                document.body
             )}
-        </div>
+        </>
     );
 };
 

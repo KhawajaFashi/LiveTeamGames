@@ -16,6 +16,7 @@ const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
     const filterButtonRef = useRef<HTMLDivElement | null>(null);
     const [checkedItems, setCheckedItems] = useState<boolean[]>([]);
     const [rows, setRows] = useState<any[]>([]);
+    const menuRefs = useRef<(HTMLButtonElement | null)[]>([]);
     // keep a copy of the raw fetched routes so we can re-filter without refetching
     const [rawRows, setRawRows] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -268,6 +269,13 @@ const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
 
                                 <td className="px-6 py-2 text-sm text-gray-900">{row.lastEdited ?? '-'}</td>
                                 <td className="px-6 py-2 relative">
+                                    <button
+                                        ref={(el) => { menuRefs.current[index] = el; }}
+                                        onClick={menuOpenIdx === index ? () => setMenuOpenIdx(null) : () => setMenuOpenIdx(index)} className="text-gray-400 hover:text-gray-600 hover:bg-sky-500 rounded-[50%] p-1 z-50 relative">
+                                        <svg className="w-5 h-5 hover:text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                                        </svg>
+                                    </button>
                                     <RouteActionsMenu
                                         open={menuOpenIdx === index}
                                         onOpen={() => setMenuOpenIdx(index)}
@@ -300,6 +308,7 @@ const GameTable: React.FC<GameTableProps> = ({ gameData, gameType }) => {
                                                 console.error('Error duplicating route', err);
                                             }
                                         }}
+                                        anchorRef={{ current: menuRefs.current[index] as HTMLButtonElement }}
                                     />
                                 </td>
                             </tr>

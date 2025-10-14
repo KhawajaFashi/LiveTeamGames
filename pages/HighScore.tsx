@@ -13,6 +13,7 @@ interface HighscoreRow {
     gameName?: string;
     name?: string;
     updatedAt?: string;
+    createdAt?: string;
     saved?: string | number;
     teams?: Team[] | [];
 }
@@ -55,7 +56,6 @@ interface HighScoresInterface {
     highScore: HighscoreRow;
     routes: RouteWithTeams[] | [];
 }
-const savedHighscores: HighscoreRow[] = [];
 
 interface HighScoreProps {
     highScoreType?: string | '';
@@ -64,6 +64,7 @@ interface HighScoreProps {
 const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
     const gameName = highScoreType || '';
     const [liveHighscores, setLiveHighscores] = useState<HighscoreRow[]>([]);
+    const [saveHighscores, setSaveHighscores] = useState<HighscoreRow[]>([]);
     const [menuOpenIdx, setMenuOpenIdx] = useState<number | null>(null);
     const [showModalIdx, setShowModalIdx] = useState<number | null>(null);
     const [showModalOpen, setShowModalOpen] = useState(false);
@@ -90,7 +91,8 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                     gameName: r.highScore.gameName,
                     name: r.highScore.name,
                     updatedAt: r.highScore.updatedAt,
-                    saved: r.highScore.value,
+                    createdAt: r.highScore.createdAt,
+                    saved: r.highScore.saved,
                     teams: Array.from(
                         new Map(
                             r.routes
@@ -104,22 +106,20 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                 .map((team: any) => [team._id.toString(), team]) // unique by _id
                         ).values()
                     ),
-
-
-
-                    // teamCount: r.routes.flatMap((route: any) => route.teams).length,
                 }));
 
-                const routes = res.map((r: any) => r.routes);
-                const teamsData = routes.flatMap((routeArr: any) =>
-                    routeArr.flatMap((r: any) => r.teams)
-                );
 
-                setLiveHighscores(highScores);
-                // setTeams(teamsData);
+                const savedHighScores = highScores.filter(h => h.saved); // saved = true
+                const liveHighScores = highScores.filter(h => !h.saved); // saved = false
 
+                liveHighScores.sort((a: HighscoreRow, b: HighscoreRow) => {
+                    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                    return dateB + dateA; // descending order
+                })
+                setLiveHighscores(liveHighScores);
+                setSaveHighscores(savedHighScores);
                 console.log("HighScores", highScores[0]?.teams);
-                // console.log("Teams", teamsData);
             }
         };
 
@@ -153,8 +153,8 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                     <td className="py-2 px-2 text-center">{row.name}</td>
                                     <td className="py-2 px-2 text-center">{row?.teams?.length}</td>
                                     <td className="py-2 px-2 text-center">{row?.updatedAt
-                                        ? new Date(row.updatedAt).toISOString().split("T")[0]
-                                        : "-"}</td>
+                                        ? new Date(row.updatedAt).toISOString().split("T")[0].replace(/-/g, ".") + " " + new Date(row.updatedAt).toISOString().split("T")[1].split(":")[0] + ":" + new Date(row.updatedAt).toISOString().split("T")[1].split(":")[1]
+                                        : "-"} </td>
                                     <td className="py-2 px-2 text-center relative">
                                         <button
                                             ref={(el) => { actionAnchorRefs.current[idx] = el; }}
@@ -169,6 +169,7 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                             </svg>
                                         </button>
                                         <HighscoreActionsMenu
+                                            idx={idx}
                                             open={menuOpenIdx === idx}
                                             onClose={() => setMenuOpenIdx(null)}
                                             onShow={() => {
@@ -182,7 +183,26 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                                 setEditNameOpen(true);
                                                 setMenuOpenIdx(null);
                                             }}
-                                            onSave={() => {/* TODO: Implement Save */ setMenuOpenIdx(null); }}
+                                            onSave={async () => {
+                                                const rowId = liveHighscores[idx]?._id;
+                                                if (!rowId) return;
+                                                try {
+                                                    const res = await api.post('/highscore/save', { _id: rowId });
+                                                    if (res.data?.success) {
+                                                        // Move to saved highscores
+                                                        const saved = liveHighscores[idx];
+                                                        setLiveHighscores(prev => prev.filter((_, i) => i !== idx));
+                                                        setSaveHighscores(prev => [{
+                                                            ...saved,
+                                                            saved: "1", // Use string "1" to match interface
+                                                            updatedAt: new Date().toISOString()
+                                                        }, ...prev]);
+                                                    }
+                                                } catch (err) {
+                                                    console.error('Failed to save highscore:', err);
+                                                }
+                                                setMenuOpenIdx(null);
+                                            }}
                                             onDownloadTeamData={() => {/* TODO: Implement Download Team Data */ setMenuOpenIdx(null); }}
                                             onReset={() => {
                                                 setResetIdx(idx);
@@ -211,8 +231,21 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                                 open={editNameOpen}
                                                 initialName={editNameValue}
                                                 onClose={() => setEditNameOpen(false)}
-                                                onSave={() => {
-                                                    // TODO: Save new name to backend or state
+                                                onSave={async (newName: string) => {
+                                                    const rowId = liveHighscores[idx]?._id;
+                                                    if (!rowId) { setEditNameOpen(false); return; }
+                                                    try {
+                                                        const res = await api.post('/highscore/edit_name', { _id: rowId, name: newName });
+                                                        const data = res.data;
+                                                        if (data?.success && data.data) {
+                                                            setLiveHighscores(prev => prev.map((r, i) => i === idx ? { ...r, name: data.data.name, updatedAt: data.data.updatedAt } : r));
+                                                        } else {
+                                                            setLiveHighscores(prev => prev.map((r, i) => i === idx ? { ...r, name: newName } : r));
+                                                        }
+                                                    } catch (err) {
+                                                        console.error('Edit name failed', err);
+                                                        setLiveHighscores(prev => prev.map((r, i) => i === idx ? { ...r, name: newName } : r));
+                                                    }
                                                     setEditNameOpen(false);
                                                 }}
                                             />
@@ -222,8 +255,25 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                             <HighscoreReset
                                                 open={resetOpen}
                                                 onClose={() => setResetOpen(false)}
-                                                onReset={() => {
-                                                    // TODO: Reset teams for this highscore
+                                                onReset={async () => {
+                                                    const rowId = liveHighscores[idx]?._id;
+                                                    if (!rowId) {
+                                                        setResetOpen(false);
+                                                        return;
+                                                    }
+                                                    try {
+                                                        const res = await api.post('/highscore/reset', { _id: rowId });
+                                                        if (res.data?.success) {
+                                                            // Update the highscore in list to reflect reset
+                                                            setLiveHighscores(prev => prev.map((h, i) =>
+                                                                i === idx
+                                                                    ? { ...h, teams: [], updatedAt: new Date().toISOString() }
+                                                                    : h
+                                                            ));
+                                                        }
+                                                    } catch (err) {
+                                                        console.error('Failed to reset highscore:', err);
+                                                    }
                                                     setResetOpen(false);
                                                 }}
                                             />
@@ -233,9 +283,21 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                             <HighscoreDelete
                                                 open={deleteOpen}
                                                 onClose={() => setDeleteOpen(false)}
-                                                onDelete={() => {
-                                                    // setLiveHighscores(prev => prev.filter((_, i) => i !== deleteIdx));
-                                                    // setDeleteOpen(false);
+                                                onDelete={async () => {
+                                                    const rowId = liveHighscores[idx]?._id;
+                                                    if (!rowId) {
+                                                        setDeleteOpen(false);
+                                                        return;
+                                                    }
+                                                    try {
+                                                        const res = await api.post('/highscore/delete', { _id: rowId });
+                                                        if (res.data?.success) {
+                                                            setLiveHighscores(prev => prev.filter((_, i) => i !== idx));
+                                                        }
+                                                    } catch (err) {
+                                                        console.error('Failed to delete highscore:', err);
+                                                    }
+                                                    setDeleteOpen(false);
                                                 }}
                                             />
                                         )}
@@ -252,17 +314,27 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                     open={addOpen}
                     onClose={() => setAddOpen(false)}
                     gameName={liveHighscores[0]?.gameName || "Game1"}
-                    onAdd={() => {
-                        // setLiveHighscores(prev => [
-                        //     ...prev,
-                        //     {
-                        //         game: liveHighscores[0]?.game || "Game1",
-                        //         name,
-                        //         teams: 0,
-                        //         lastEdited: new Date().toLocaleString(),
-                        //     }
-                        // ]);
-                        // setAddOpen(false);
+                    onAdd={async (name: string) => {
+                        if (!name || name.trim().length === 0) return;
+                        try {
+                            const payload = { gameName: liveHighscores[0]?.gameName || gameName || 'Game1', name };
+                            const res = await api.post('/highscore/add_high_score', payload);
+                            const data = res.data;
+                            if (data?.success && data.data) {
+                                const created: HighscoreRow = {
+                                    _id: data.data._id,
+                                    gameName: data.data.gameName,
+                                    name: data.data.name,
+                                    updatedAt: data.data.updatedAt,
+                                    saved: data.data.saved,
+                                    teams: [],
+                                };
+                                setLiveHighscores(prev => [created, ...prev]);
+                                setAddOpen(false);
+                            }
+                        } catch (err) {
+                            console.error('Add highscore failed', err);
+                        }
                     }}
                 />
             )}
@@ -284,12 +356,12 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {savedHighscores.length === 0 ? (
+                            {saveHighscores.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="text-center py-4 text-gray-400">No saved highscores</td>
                                 </tr>
                             ) : (
-                                savedHighscores.map((row: HighscoreRow, idx: number) => (
+                                saveHighscores.map((row: HighscoreRow, idx: number) => (
                                     <tr key={idx}>
                                         <td className="py-2 px-2 text-center">{row.gameName}</td>
                                         <td className="py-2 px-2 text-center">{row.name}</td>

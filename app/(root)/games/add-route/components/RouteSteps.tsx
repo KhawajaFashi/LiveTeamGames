@@ -59,21 +59,43 @@ const RouteSteps: React.FC<StepProps> = ({ step, totalSteps, routeType, gameId, 
 
         // In the final step, post data to /games/add_route
         try {
-            const routeData = {
+            let description: string | undefined = undefined;
+            let riddles: string[] = [];
+
+            // If a templateId is provided, fetch templates for this game and find the matching template
+            if (templateId) {
+                try {
+                    const tmplRes = await api.get(`/games/get_template?gameName=${encodeURIComponent(gameId)}`);
+                    const templates = tmplRes.data?.data || [];
+                    const found = templates.find((t: any) => (t._id === templateId || t.id === templateId));
+                    if (found) {
+                        description = found.description;
+                        riddles = (found.riddles || []).map((r: any) => r._id || r);
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch templates for templateId lookup, falling back to selectedTemplate', err);
+                }
+            }
+
+            // If we still have no riddles and a selectedTemplate object exists, use it as fallback
+            if ((!riddles || riddles.length === 0) && selectedTemplate) {
+                description = description || selectedTemplate.description;
+                riddles = selectedTemplate.riddles?.map((r: any) => r._id) || [];
+            }
+
+            const routeData: any = {
                 gameName: gameId,
                 name: routeName,
                 playingTime: parseInt(playingTime) || 0,
                 templateId: templateId,
                 routeType: routeType,
                 shareCode: shareCode,
-                ...(selectedTemplate && {
-                    description: selectedTemplate.description,
-                    riddles: selectedTemplate.riddles?.map((r: any) => r._id) || []
-                })
             };
 
-            console.log("Template ID: ", templateId);
-            // console.log(templateId)
+            if (description) routeData.description = description;
+            if (riddles && riddles.length) routeData.riddles = riddles;
+
+            console.log("Template ID: ", templateId, ' -> riddles:', riddles.length);
 
             const response = await api.post('/games/add_route', routeData);
 

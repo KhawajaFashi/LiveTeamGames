@@ -174,12 +174,30 @@ const RouteSettings = () => {
 
     const fetch_data = async () => {
         const res = await api.get(`/highscore/fetch_data?gameName=${encodeURIComponent(gameID)}`);
-        console.log(res.data.data);
-        if (res.data.success && res.data.data) {
-            setHighscoresArray(res.data.data);
+        return res.data.data;
+    }
+    const fetchAll = async () => {
+        const res = await fetch_data(); // ✅ await the promise
+        console.log("Response", res)
+        if (res) {
+            const highScores: HighscoreRow[] = res.map((r: any) => ({
+                _id: r.highScore._id,
+                gameName: r.highScore.gameName,
+                name: r.highScore.name,
+                updatedAt: r.highScore.updatedAt,
+                createdAt: r.highScore.createdAt,
+                saved: r.highScore.saved,
+            }));
+
+            setHighscoresArray(highScores);
+            // console.log(hi)
+            setHighscore(highScores[0]?._id || '');
+            console.log("HighScores", highScores[0]);
         }
     }
-
+    useEffect(() => { 
+        fetchAll();
+    },[])
     const onSave = async () => {
         setSaving(true);
         setMessage(null);
@@ -230,7 +248,7 @@ const RouteSettings = () => {
             // refresh settings
             try {
                 const r = await api.get(`/games/fetch_settings?routeName=${encodeURIComponent(routeID)}`);
-                // console.log(r);
+                // console.log("r:",r);
                 if (r.data && r.data.success) {
                     const s = r.data.data;
                     setRouteName(s.name || '');
@@ -368,7 +386,7 @@ const RouteSettings = () => {
                         <label className="block text-gray-700 font-medium mb-1">Connected Highscore :</label>
                         <select className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={highscore} onChange={e => setHighscore(e.target.value)}>
                             {highscoresArray.map((h) => (
-                                <option key={h._id} value={h._id}>
+                                <option key={h?._id} value={h?._id}>
                                     {h.name}
                                 </option>
                             ))}

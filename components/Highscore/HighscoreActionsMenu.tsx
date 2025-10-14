@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface HighscoreActionsMenuProps {
+    idx?: number;
     open: boolean;
     onClose: () => void;
     onShow: () => void;
@@ -15,6 +16,7 @@ interface HighscoreActionsMenuProps {
 }
 
 const HighscoreActionsMenu: React.FC<HighscoreActionsMenuProps> = ({
+    idx,
     open,
     onClose,
     onShow,
@@ -73,11 +75,11 @@ const HighscoreActionsMenu: React.FC<HighscoreActionsMenuProps> = ({
             }}
         >
             <button className="flex items-center px-4 py-2 w-full hover:bg-gray-50" onClick={onShow}>📄 Show</button>
-            <button className="flex items-center px-4 py-2 w-full hover:bg-gray-50" onClick={onEditName}>✏️ Edit Name</button>
-            <button className="flex items-center px-4 py-2 w-full hover:bg-gray-50" onClick={onSave}>💾 Save</button>
+            <button className={`${idx === 0 ? 'pointer-events-none text-gray-400' : ''} flex items-center px-4 py-2 w-full hover:bg-gray-50`} onClick={onEditName}>✏️ Edit Name</button>
+            <button className={`${idx === 0 ? 'pointer-events-none text-gray-400' : ''} flex items-center px-4 py-2 w-full hover:bg-gray-50`} onClick={onSave}>💾 Save</button>
             <button className="flex items-center px-4 py-2 w-full hover:bg-gray-50" onClick={onDownloadTeamData}>☁️ Download Team Data</button>
             <button className="flex items-center px-4 py-2 w-full hover:bg-gray-50" onClick={onReset}>🔄 Reset</button>
-            <button className="flex items-center px-4 py-2 w-full hover:bg-gray-50 text-red-500" onClick={onDelete}>🗑️ Delete</button>
+            <button className={`${idx === 0 ? 'pointer-events-none text-gray-400' : ''} flex items-center px-4 py-2 w-full hover:bg-gray-50`} onClick={onDelete}>🗑️ Delete</button>
         </div>,
         document.body
     );

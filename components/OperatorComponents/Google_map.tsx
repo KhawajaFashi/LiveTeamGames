@@ -319,7 +319,7 @@ const Map: React.FC<MapProps> = ({ teams, selectedTeamNo }) => {
         updateMarkers();
     }, [teams, selectedTeamNo, updateMarkers]);
 
-    return <div ref={mapRef} style={{ width: "100%", height: 400 }} />;
+    return <div ref={mapRef} className="w-full h-full"/>;
 };
 
 export default Map;

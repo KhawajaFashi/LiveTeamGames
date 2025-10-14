@@ -12,6 +12,7 @@ const highScoreSchema = new Schema({
     saved: {
         type: Boolean,
         required: true,
+        default: false
     },
 
 }, { timestamps: true })
