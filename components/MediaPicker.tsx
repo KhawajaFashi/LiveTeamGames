@@ -109,6 +109,7 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) =>
                         // leave optimistic preview
                         return;
                     }
+                    console.log("CloudName and UploadPreset: ",cloudName, uploadPreset);
 
                     const form = new FormData();
                     form.append('file', file);
