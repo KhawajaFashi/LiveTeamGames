@@ -151,6 +151,49 @@ export const saveHighScore = async (req, res) => {
         });
     }
 }
+export const saveHighScoreState = async (req, res) => {
+    try {
+        const { _id } = req.body;
+        if (!_id) {
+            return res.status(400).json({
+                success: false,
+                message: "Highscore ID is required"
+            });
+        }
+
+        // Find and update the highscore to saved=false
+        const updatedHighScore = await highScore.findByIdAndUpdate(
+            _id,
+            {
+                $set: {
+                    saved: false,
+                    updatedAt: new Date()
+                }
+            },
+            { new: true }
+        );
+
+        if (!updatedHighScore) {
+            return res.status(404).json({
+                success: false,
+                message: "Highscore not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: updatedHighScore,
+            message: "Highscore saved successfully"
+        });
+    } catch (error) {
+        console.error('Error saving highscore:', error);
+        res.status(500).json({
+            success: false,
+            message: "Error saving highscore",
+            error: error.message
+        });
+    }
+}
 export const deletehighScore = async (req, res) => {
     try {
         const { _id } = req.body;

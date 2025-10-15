@@ -4,7 +4,6 @@ import {
     addRoute,
     updateFavourite,
     updateStatus,
-    updateSettings,
     updateGearSettings,
     updateRoute,
     deleteRoute,
@@ -15,6 +14,7 @@ import {
     fetchRouteRiddles,
     editRiddle,
     fetchRouteSettings,
+    fetchGearSettings,
 } from '../controllers/games.js';
 import {
     addRouteTemplate,
@@ -32,7 +32,7 @@ router.post('/add_route', addRoute);
 router.post('/edit_riddle', editRiddle);
 router.post('/toggle_favourite', updateFavourite);
 router.post('/toggle_status', updateStatus);
-router.post('/update_settings', updateSettings);
+router.get('/fetch_gear_settings', fetchGearSettings);
 router.post('/update_gear_settings', updateGearSettings);
 router.post('/update_route', updateRoute);
 router.post('/add_riddle', addRiddle);

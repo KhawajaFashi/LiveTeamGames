@@ -7,6 +7,7 @@ import HighscoreReset from "../components/Highscore/HighscoreReset";
 import HighscoreDelete from "../components/Highscore/HighscoreDelete";
 import HighscoreAdd from "../components/Highscore/HighscoreAdd";
 import api from "@/utils/axios";
+import SavedHighscoreActionsMenu from "@/components/Highscore/SavedHighscoreActionsMenu";
 
 interface HighscoreRow {
     _id?: string;
@@ -66,9 +67,11 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
     const [liveHighscores, setLiveHighscores] = useState<HighscoreRow[]>([]);
     const [saveHighscores, setSaveHighscores] = useState<HighscoreRow[]>([]);
     const [menuOpenIdx, setMenuOpenIdx] = useState<number | null>(null);
+    const [savedMenuOpenIdx, setSavedMenuOpenIdx] = useState<number | null>(null);
     const [showModalIdx, setShowModalIdx] = useState<number | null>(null);
     const [showModalOpen, setShowModalOpen] = useState(false);
     const actionAnchorRefs = useRef<(HTMLButtonElement | null)[]>([]);
+    const savedActionAnchorRefs = useRef<(HTMLButtonElement | null)[]>([]);
     const [editNameIdx, setEditNameIdx] = useState<number | null>(null);
     const [editNameOpen, setEditNameOpen] = useState(false);
     const [editNameValue, setEditNameValue] = useState("");
@@ -113,13 +116,20 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                 const liveHighScores = highScores.filter(h => !h.saved); // saved = false
 
                 liveHighScores.sort((a: HighscoreRow, b: HighscoreRow) => {
+                    // Keep "Game1 Default" always on top
+                    if (a.name === "Game1 Default") return -1;
+                    if (b.name === "Game1 Default") return 1;
+
+                    // Sort the rest by createdAt (descending)
                     const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
                     const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                    return dateB + dateA; // descending order
-                })
+                    return dateB - dateA;
+                });
+
                 setLiveHighscores(liveHighScores);
                 setSaveHighscores(savedHighScores);
-                console.log("HighScores", highScores[0]?.teams);
+                console.log("Live HighScores", liveHighScores);
+                console.log("Saved HighScores", savedHighScores);
             }
         };
 
@@ -187,7 +197,7 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                                 const rowId = liveHighscores[idx]?._id;
                                                 if (!rowId) return;
                                                 try {
-                                                    const res = await api.post('/highscore/save', { _id: rowId });
+                                                    const res = await api.post('/highscore/save_high_score', { _id: rowId });
                                                     if (res.data?.success) {
                                                         // Move to saved highscores
                                                         const saved = liveHighscores[idx];
@@ -365,12 +375,81 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                     <tr key={idx}>
                                         <td className="py-2 px-2 text-center">{row.gameName}</td>
                                         <td className="py-2 px-2 text-center">{row.name}</td>
-                                        <td className="py-2 px-2 text-center">{row.updatedAt}</td>
-                                        <td className="py-2 px-2 text-center">{row.saved}</td>
-                                        <td className="py-2 px-2 text-center">
-                                            <button className="text-gray-400 hover:text-gray-600">
-                                                <span className="font-bold text-xl">...</span>
+                                        <td className="py-2 px-2 text-center">{row.teams?.length}</td>
+                                        <td className="py-2 px-2 text-center">{row?.updatedAt
+                                            ? new Date(row.updatedAt).toISOString().split("T")[0].replace(/-/g, ".") + " " + new Date(row.updatedAt).toISOString().split("T")[1].split(":")[0] + ":" + new Date(row.updatedAt).toISOString().split("T")[1].split(":")[1]
+                                            : "-"}</td>
+                                        <td className="py-2 px-2 text-center relative">
+                                            <button
+                                                ref={(el) => { savedActionAnchorRefs.current[idx] = el; }}
+                                                className="text-gray-400 hover:text-gray-600 hover:bg-sky-500 rounded-[50%] p-1"
+                                                onClick={() => {
+                                                    if (savedMenuOpenIdx === idx) setSavedMenuOpenIdx(null);
+                                                    else setSavedMenuOpenIdx(idx);
+                                                }}
+                                            >
+                                                <svg className="w-4 h-4 hover:text-white text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M6 12c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2zm8 0c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2zm8 0c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2z" />
+                                                </svg>
                                             </button>
+                                            <SavedHighscoreActionsMenu
+                                                open={savedMenuOpenIdx === idx}
+                                                onClose={() => setSavedMenuOpenIdx(null)}
+                                                onShow={() => {
+                                                    setShowModalIdx(idx);
+                                                    setShowModalOpen(true);
+                                                    setSavedMenuOpenIdx(null);
+                                                }}
+                                                onSave={async () => {
+                                                    const rowId = saveHighscores[idx]?._id;
+                                                    if (!rowId) return;
+
+                                                    try {
+                                                        const res = await api.post('/highscore/save_saved_high_score', { _id: rowId });
+                                                        if (res.data?.success) {
+                                                            const moved = saveHighscores[idx];
+
+                                                            // Update lists
+                                                            const updatedSaved = saveHighscores.filter((_, i) => i !== idx);
+                                                            const updatedLive = [
+                                                                {
+                                                                    ...moved,
+                                                                    saved: "0",
+                                                                    updatedAt: new Date().toISOString(),
+                                                                },
+                                                                ...liveHighscores,
+                                                            ];
+
+                                                            // Sort live highscores again
+                                                            updatedLive.sort((a, b) => {
+                                                                if (a.name === "Game1 Default") return -1;
+                                                                if (b.name === "Game1 Default") return 1;
+                                                                const dateA = new Date(a.createdAt || 0).getTime();
+                                                                const dateB = new Date(b.createdAt || 0).getTime();
+                                                                return dateB - dateA; // latest first
+                                                            });
+
+                                                            setSaveHighscores(updatedSaved);
+                                                            setLiveHighscores(updatedLive);
+                                                        }
+                                                    } catch (err) {
+                                                        console.error("Failed to unsave highscore:", err);
+                                                    }
+
+                                                    setSavedMenuOpenIdx(null);
+                                                }}
+                                                onDownloadTeamData={() => {/* TODO: Implement Download Team Data */ setSavedMenuOpenIdx(null); }}
+                                                anchorRef={{ current: savedActionAnchorRefs.current[idx] as HTMLButtonElement }}
+                                            />
+                                            {/* Show modal for teams */}
+                                            {showModalOpen && showModalIdx === idx && (
+                                                <HighscoreShow
+                                                    open={showModalOpen}
+                                                    onClose={() => setShowModalOpen(false)}
+                                                    highscoreName={row.name || "Highscore"}
+                                                    teams={row?.teams || []}
+                                                />
+                                            )}
                                         </td>
                                     </tr>
                                 ))

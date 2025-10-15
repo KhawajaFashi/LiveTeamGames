@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MediaPicker from '@/components/MediaPicker';
 import RouteActionsMenu from '@/app/(root)/games/new-route/components/RouteActionsMenu';
+import EndLocationPicker from '@/app/(root)/games/new-route/components/EndLocationPicker';
 import { useCallback } from 'react';
 import BackButton from './BackButton';
 import { FaGear } from 'react-icons/fa6';
@@ -113,6 +114,8 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
     const [editId, setEditId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
     const [editCoordinates, setEditCoordinates] = useState<string[]>(['', '']);
+    const [endLocationPickerOpen, setEndLocationPickerOpen] = useState(false); // used by gear/settings modal
+    const [editLocationPickerOpen, setEditLocationPickerOpen] = useState(false); // used by edit riddle modal
     const [editRadius, setEditRadius] = useState('30');
     const [editDescription, setEditDescription] = useState('');
     const [editPicture, setEditPicture] = useState('');
@@ -397,6 +400,35 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
         }
     };
 
+    useEffect(() => {
+        const fetchGearSettings = async () => {
+            try {
+                const res = await api.get(`/games/fetch_gear_settings?routeId=${encodeURIComponent(routeID)}`);
+                if (res.data?.success && res.data?.gearSettings) {
+                    const g = res.data.gearSettings;
+                    setGearArVideoTutorial(g.arVideoTutorial || '');
+                    setGearIntroVideo(g.introVideo || '');
+                    setGearOutroWinVideo(g.outroWinVideo || '');
+                    setGearOutroLoseVideo(g.outroLoseVideo || '');
+                    setGearStartText(g.startText || '');
+                    setGearEndText(g.endText || '');
+                    setGearEndLocationActive(g.endLocation?.active || false);
+                    setGearEndLocationName(g.endLocation?.name || '');
+                    setGearEndLocationCoordinates({
+                        lat: g.endLocation?.coordinates?.lat?.toString() || '',
+                        lng: g.endLocation?.coordinates?.lng?.toString() || '',
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to fetch gear settings:', err);
+            }
+        };
+
+        fetchGearSettings();
+    }, []);
+
+    console.log("GearEnd Location:", gearEndLocationActive)
+
     return (
         <div className="bg-white shadow-sm">
             <div className='flex justify-between items-center mb-8 p-4 border-b border-gray-200'>
@@ -525,6 +557,14 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                                     console.error('Error adding riddle:', error);
                                                     // You might want to show an error message to the user here
                                                 }
+                                                {editLocationPickerOpen && (
+                                                    <EndLocationPicker
+                                                        open={editLocationPickerOpen}
+                                                        initialCoords={editCoordinates[0] && editCoordinates[1] ? [editCoordinates[0], editCoordinates[1]] : undefined}
+                                                        onClose={() => setEditLocationPickerOpen(false)}
+                                                        onSelect={(coords) => { setEditCoordinates(coords); setEditLocationPickerOpen(false); }}
+                                                    />
+                                                )}
                                             }}
                                         >Add Riddle</button>
                                     </div>
@@ -559,7 +599,7 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                     </div>
                                     {/* Tab content */}
                                     {activeTab === 'Videos' && (
-                                        <div className="grid grid-cols-1 gap-4 items-start h-[50vh] mb-6">
+                                        <div className="grid grid-cols-1 gap-4 items-start mb-6">
                                             <div className="flex items-center justify-between">
                                                 <div>
                                                     <div className="font-medium">AR Tutorial Video</div>
@@ -608,22 +648,44 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                     )}
                                     {activeTab === 'Start Text' && (
                                         <div className="text-gray-500 pb-59.5 pt-2 text-center">
-                                            <textarea className="border px-3 py-1.5 w-full text-[13px] rounded focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 min-h-[120px]" defaultValue="Are you ready to start your mission?" />
+                                            <textarea className="border px-3 py-1.5 w-full text-[13px] rounded focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 min-h-[120px]" value={gearStartText} onChange={(e) => setGearStartText(e.target.value)} />
                                         </div>
                                     )}
                                     {activeTab === 'End Text' && (
                                         <div className="text-gray-500 pb-59.5 pt-2 text-center">
-                                            <textarea className="border px-3 py-1.5 w-full text-[13px] rounded focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 min-h-[120px]" defaultValue="Well done, you've made it! Now, return to your starting point." />
+                                            <textarea className="border px-3 py-1.5 w-full text-[13px] rounded focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 min-h-[120px]" value={gearEndText} onChange={(e) => setGearEndText(e.target.value)} />
                                         </div>
                                     )}
                                     {activeTab === 'End Location' && (
-                                        <div className="text-gray-500 grid grid-cols-2 items-center pb-84 pt-2 text-center">
+                                        <div className="text-gray-500 grid grid-cols-[1fr_1.8fr] items-start gap-6 pt-2 text-center">
+                                            {/* <div> */}
                                             <label className='block text-gray-700 text-left font-medium mb-1'>Enable End Location</label>
-                                            <input type="checkbox" className='mr-2 w-4 h-4 accent-[#009FE3]' name="" id="" />
+                                            <input type="checkbox" className='mr-2 w-4 h-4 accent-[#009FE3]' checked={gearEndLocationActive} onChange={e => setGearEndLocationActive(e.target.checked)} />
+                                            {/* </div> */}
+                                            {/* <div className={`text-left ${gearEndLocationActive ? '' : 'hidden'}`}> */}
+                                            <label className={`block text-gray-700 font-medium mb-1 text-left ${gearEndLocationActive ? '' : 'hidden'}`}>Name <span className="text-red-500">*</span></label>
+                                            <input type="text" className={`border px-3 py-2 w-full text-[13px] rounded focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 ${gearEndLocationActive ? '' : 'hidden'}`} value={gearEndLocationName} onChange={e => setGearEndLocationName(e.target.value)} />
+                                            <label className={`block text-gray-700 font-medium mt-3 mb-1 text-left ${gearEndLocationActive ? '' : 'hidden'}`}>Coordinates</label>
+                                            <div className={`border p-3 rounded bg-white border-gray-200 text-left ${gearEndLocationActive ? '' : 'hidden'}`}>
+                                                <button className="text-[#009FE3] text-sm font-medium text-left mb-1" onClick={() => setEndLocationPickerOpen(true)}>&#128205; Set coordinates on map</button>
+                                                <div className="text-sm text-gray-700 mt-2 text-left">
+                                                    <div>{gearEndLocationCoordinates.lat || '-'} </div>
+                                                    <div>{gearEndLocationCoordinates.lng || '-'} </div>
+                                                </div>
+                                            </div>
+                                            {/* </div> */}
+                                            {endLocationPickerOpen && (
+                                                <EndLocationPicker
+                                                    open={endLocationPickerOpen}
+                                                    initialCoords={gearEndLocationCoordinates.lat && gearEndLocationCoordinates.lng ? [String(gearEndLocationCoordinates.lat), String(gearEndLocationCoordinates.lng)] : undefined}
+                                                    onClose={() => setEndLocationPickerOpen(false)}
+                                                    onSelect={(coords) => { setGearEndLocationCoordinates({ lat: coords[0], lng: coords[1] }); setEndLocationPickerOpen(false); }}
+                                                />
+                                            )}
                                         </div>
                                     )}
                                     {activeTab && (
-                                        <div className='border-t border-gray-200 pt-4 flex justify-end px-6'>
+                                        <div className='border-t border-gray-200 pt-4 flex justify-end px-6 absolute bottom-4 w-[90%]'>
                                             <button className="px-4 py-2 rounded bg-[#009FE3] text-white font-semibold hover:bg-[#007bb5]" onClick={async () => {
                                                 try {
                                                     const payload: any = {
@@ -853,7 +915,7 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                                             </span>
                                                             <label className="text-gray-700 font-medium text-ledt">Coordinates</label>
                                                             <div className="flex flex-col gap-1">
-                                                                <button className="text-[#009FE3] text-sm font-medium text-left mb-1">&#128205; Set coordinates on map</button>
+                                                                <button className="text-[#009FE3] text-sm font-medium text-left mb-1" onClick={() => setEndLocationPickerOpen(true)}>&#128205; Set coordinates on map</button>
                                                                 <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={editCoordinates[0]} onChange={e => setEditCoordinates([e.target.value, editCoordinates[1]])} />
                                                                 <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={editCoordinates[1]} onChange={e => setEditCoordinates([editCoordinates[0], e.target.value])} />
                                                             </div>

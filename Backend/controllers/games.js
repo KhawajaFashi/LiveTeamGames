@@ -215,8 +215,21 @@ export const updateStatus = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Error updating active', error: error.message });
     }
 }
-export const updateSettings = async (req, res) => {
+export const fetchGearSettings = async (req, res) => {
+    try {
+        console.log("hello i am here");
+        const { routeId } = req.query;
+        console.log(routeId);
+        const foundRoute = await route.findOne({ name: routeId }).select('gearSettings');
+        console.log(foundRoute);
 
+        if (!foundRoute) return res.status(404).json({ success: false, message: 'Route not found' });
+
+        res.json({ success: true, gearSettings: foundRoute.gearSettings });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
 }
 export const updateGearSettings = async (req, res) => {
     try {
