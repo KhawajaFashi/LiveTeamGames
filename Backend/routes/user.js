@@ -5,7 +5,8 @@ import {
     handleUserSignup,
     verify_login,
     uploadData,
-    fetchUserProfile
+    fetchUserProfile,
+    uploadDataWithEmail
 } from '../controllers/user.js';
 import { getUserMedia, addUserMedia, deleteUserMedia } from '../controllers/user.js';
 
@@ -20,6 +21,8 @@ router.post('/logout', handleUserLogout);
 router.post('/verify_login', verify_login);
 
 router.post('/update_profile', uploadData);
+
+router.post('/update_profile_with_email', uploadDataWithEmail);
 
 router.get('/fetch_profile', fetchUserProfile);
 

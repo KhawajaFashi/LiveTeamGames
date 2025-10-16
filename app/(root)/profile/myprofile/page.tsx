@@ -1,7 +1,9 @@
 "use client";
 import api from "@/utils/axios";
 import { AxiosError } from "axios";
-import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import React, { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 const steps = ["Profile", "Settings", "Team Photos"];
 
@@ -53,6 +55,26 @@ const MyProfile: React.FC = () => {
 
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [previewMode, setPreviewMode] = useState(false);
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+    // helper: insert text at cursor
+    const insertAtCursor = (text: string) => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const newText =
+            emailContent.substring(0, start) + text + emailContent.substring(end);
+        setEmailContent(newText);
+
+        // restore cursor position
+        setTimeout(() => {
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = start + text.length;
+        }, 0);
+    };
     useEffect(() => {
         // Runs only in browser
         const storedUser = localStorage.getItem('user')
@@ -95,7 +117,7 @@ const MyProfile: React.FC = () => {
     const handleSave = async () => {
         let newErrors: any = {};
         // Password validation
-        if ((newPassword || repeatPassword) && newPassword !== repeatPassword) {
+        if ((newPassword !== '' || repeatPassword !== '') && newPassword !== repeatPassword) {
             newErrors.password = 'New password and repeat password must match.';
         }
         // Email validation: all or none
@@ -147,6 +169,7 @@ const MyProfile: React.FC = () => {
                 emailContent,
                 emailLang,
             };
+            console.log("Submitting profile data:", { ...profileData, ...(emailAllFilled ? emailData : {}) });
             const response = await api.post(`/user/${emailAllFilled ? 'update_profile_with_email' : 'update_profile'}`, { ...profileData, ...(emailAllFilled ? emailData : {}), });
             if (response.status === 200) {
                 console.log('Saved!', response.data.message);
@@ -236,7 +259,7 @@ const MyProfile: React.FC = () => {
                         <h3 className="font-semibold text-lg mb-4">Tutorial</h3>
                         <div className="grid grid-cols-[1fr_3fr] gap-x-10 gap-y-6 mb-10 text-[13px] text-gray-600">
                             <span>Team Photos:</span>
-                            <a href="#" className="text-[#00A3FF]">How to automatically send team photos to players</a>
+                            <Link href="#" className="text-[#00A3FF]">How to automatically send team photos to players</Link>
                         </div>
                         <hr className="mb-6 text-gray-200" />
                         <h3 className="font-semibold text-lg mb-4">Email</h3>
@@ -252,29 +275,61 @@ const MyProfile: React.FC = () => {
                                 <div className="text-xs text-gray-400 mt-1">Please enter your reply email. All replies will be sent to this email address.</div>
                             </div>
                             <label className="font-normal pt-2 text-left">Email Content<span className='text-red-600'>*</span></label>
-                            <div>
-                                <div className="flex gap-2 mb-2">
-                                    <select className="border px-3 py-2 rounded text-[13px] bg-[#00A3FF] focus:outline-none text-white border-gray-200" value={emailLang} onChange={e => setEmailLang(e.target.value)}>
-                                        <option value="english">English</option>
-                                        <option value="german">German</option>
-                                    </select>
-                                </div>
-                                <input className="border px-3 py-1.5 w-full text-[13px] rounded focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 mb-2" placeholder="Your Team Photos" value={emailSubject} onChange={e => setEmailSubject(e.target.value)} />
-                                <div className="text-xs text-gray-400 mb-2">Enter your subject line.</div>
-                                <div className="border rounded bg-white">
-                                    {/* Simple rich text area mockup */}
-                                    <div className="flex gap-2 p-2 border-b">
-                                        <button type="button" className="px-2 py-1 border rounded text-xs">B</button>
-                                        <button type="button" className="px-2 py-1 border rounded text-xs">I</button>
-                                        <button type="button" className="px-2 py-1 border rounded text-xs">H</button>
-                                        <button type="button" className="px-2 py-1 border rounded text-xs">🖼️</button>
-                                        <button type="button" className="px-2 py-1 border rounded text-xs bg-[#00A3FF] text-white">Preview</button>
+                            <div className="flex flex-col gap-3">
+                                <input className="border px-3 py-1.5 w-full text-[13px] rounded focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200" placeholder="Enter your email Subject" value={emailSubject} onChange={e => setEmailSubject(e.target.value)} />
+                                <div className="w-full mx-auto border bg-white shadow-sm h-60 bg-gray-50">
+                                    <div className="flex gap-2 border-b border-dashed border-gray-300 p-2 w-full bg-gray-50">
+                                        <button
+                                            type="button"
+                                            onClick={() => insertAtCursor("**strong text**")}
+                                            className="px-2 py-1 border rounded text-xs"
+                                        >
+                                            B
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => insertAtCursor("_italic text_")}
+                                            className="px-2 py-1 border rounded text-xs"
+                                        >
+                                            I
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => insertAtCursor("### heading text")}
+                                            className="px-2 py-1 border rounded text-xs"
+                                        >
+                                            H
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                insertAtCursor("![alt text](https://example.com/image.jpg)")
+                                            }
+                                            className="px-2 py-1 border rounded text-xs"
+                                        >
+                                            🖼️
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setPreviewMode(!previewMode)}
+                                            className="px-2 py-1 border rounded text-xs bg-[#00A3FF] text-white"
+                                        >
+                                            {previewMode ? "Edit" : "Preview"}
+                                        </button>
                                     </div>
-                                    <textarea
-                                        className="w-full h-32 p-3 text-[13px] border-none focus:outline-none resize-none"
-                                        value={emailContent}
-                                        onChange={e => setEmailContent(e.target.value)}
-                                    />
+
+                                    {previewMode ? (
+                                        <div className="p-3 text-sm bg-none overflow-auto w-full h-[82%]">
+                                            <ReactMarkdown>{emailContent}</ReactMarkdown>
+                                        </div>
+                                    ) : (
+                                        <textarea
+                                            ref={textareaRef}
+                                            className="w-full p-3 mb-0 pb-0 text-[13px] outline-none overflow-auto h-[82%] bg-gray-50"
+                                            value={emailContent}
+                                            onChange={(e) => setEmailContent(e.target.value)}
+                                        />
+                                    )}
                                 </div>
                             </div>
                             {errors.email && <div className="col-span-2 text-red-600 text-xs">{errors.email}</div>}

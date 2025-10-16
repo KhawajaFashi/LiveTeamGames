@@ -1,6 +1,7 @@
 import User from '../models/user.js';
 import { generateToken, getUser } from '../service/auth.js';
-
+import nodemailer from "nodemailer";
+import { marked } from "marked"; // npm install marked
 
 async function handleUserSignup(req, res) {
     const { userName, email, password } = req.body;
@@ -78,15 +79,17 @@ async function uploadData(req, res) {
         }
 
 
-        const data = { ...req.body, userName: req.user.userName, email: req.user.email };;
-        const token = await matchPasswordAndGenerateToken(data.email, data.password)
-        if (!token) {
-            console.log("Password did not match");
-            res.status(404).json({ message: "Password didnot match" });
-            return;
-        }
-        if (data.newPassword && data.newPassword.length > 0) {
-            data.password = data.newPassword;
+        const data = { ...req.body, userName: req.user.userName, email: req.user.email };
+        if (data.password !== '') {   
+            const token = await matchPasswordAndGenerateToken(data.email, data.password)
+            if (!token) {
+                console.log("Password did not match");
+                res.status(404).json({ message: "Password didnot match" });
+                return;
+            }
+            if (data.newPassword && data.newPassword.length > 0) {
+                data.password = data.newPassword;
+            }
         }
         // data =
         // console.log("Data received for update:", data, token);
@@ -105,6 +108,81 @@ async function uploadData(req, res) {
 
 }
 
+async function uploadDataWithEmail(req, res) {
+    const userId = req.user ? req.user._id : null;
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const data = { ...req.body, userName: req.user.userName, email: req.user.email };
+        console.log("Data:",data)
+        if (data.password !== '') {
+            const token = await matchPasswordAndGenerateToken(data.email, data.password)
+            if (!token) {
+                console.log("Password did not match");
+                res.status(404).json({ message: "Password didnot match" });
+                return;
+            }
+            if (data.newPassword && data.newPassword.length > 0) {
+                data.password = data.newPassword;
+            }
+        }
+
+        const emailData = { senderEmailName: data.senderEmailName, replyEmail: data.replyEmail, emailSubject: data.emailSubject, emailContent: data.emailContent, emailLang: data.emailLang };
+        
+        sendMail(emailData);
+
+        if (data.password === '') {
+            // Keep the existing password if none was provided
+            data.password = user.password;
+        }
+
+        user.set(data);
+        await user.save();
+
+
+        res.status(200).json({ message: "Profile updated successfully" });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: "Profile has not been updated" });
+    }
+}
+
+export async function sendMail(emailData) {
+    const { senderEmailName, replyEmail, emailSubject, emailContent, emailLang } = emailData;
+
+    try {
+        // Convert Markdown to HTML
+        const htmlContent = marked.parse(emailContent);
+
+        // Create transporter (use your SMTP or service credentials)
+        const transporter = nodemailer.createTransport({
+            service: "gmail", // or use host, port, auth
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+            },
+        });
+
+        // Mail options
+        const mailOptions = {
+            from: `${process.env.SMTP_USER}`,
+            to: replyEmail,
+            subject: emailSubject,
+            text: emailContent, // fallback plain text
+            html: htmlContent,
+            replyTo: replyEmail,
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log("Email sent:", info.messageId);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error("Error sending email:", error);
+        return { success: false, error: error.message };
+    }
+}
 
 async function fetchUserProfile(req, res) {
     // console.log("Inside fetchUserProfile", req.headers.cookie.startsWith("uid"));
@@ -197,12 +275,11 @@ async function matchPasswordAndGenerateToken(email, password) {
     return token;
 }
 
-
-
 export {
     handleUserSignup,
     handleUserLogin,
     handleUserLogout,
+    uploadDataWithEmail,
     verify_login,
     uploadData,
     fetchUserProfile,
