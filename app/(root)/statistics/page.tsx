@@ -1,12 +1,14 @@
 "use client";
 import FilterPopup from '@/components/Statistics/StatisticsFilterPopup';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import axios from '@/utils/axios';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, PieLabelRenderProps, TooltipProps } from 'recharts';
+import api from '@/utils/axios';
 
 interface PieData extends Record<string, unknown> {
     name: string;
     value: number;
-    status: 'Won' | 'Left';
+    status: 'Won' | 'Lost' | 'Left' | string;
 }
 
 interface BarData {
@@ -15,24 +17,117 @@ interface BarData {
     game: string;
 }
 
-// Sample data for pie chart
-const pieData: PieData[] = [
-    { name: 'Games', value: 80, status: 'Left' },
-    { name: 'Games', value: 20, status: 'Won' },
-];
+// initial empty datasets
+const INITIAL_PIE: PieData[] = [];
+const INITIAL_BAR: BarData[] = [];
 
-// Sample data for bar chart
-const barData: BarData[] = [
-    { name: 'May 2023', value: 5, game: 'Game1' }
-];
-
-// Custom colors
-const COLORS = ['#5B8FF9', '#00C49F'];
+// Custom colors for Won, Lost, Left
+const COLORS = ['#00C49F', '#FF8042', '#5B8FF9'];
 const BAR_COLOR = '#69b7eb';
 
 export default function StatisticsPage() {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const filterButtonRef = useRef<HTMLDivElement | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [pieData, setPieData] = useState<PieData[]>(INITIAL_PIE);
+    const [barData, setBarData] = useState<BarData[]>(INITIAL_BAR);
+    const [totalGames, setTotalGames] = useState<number>(0);
+    const [filters, setFilters] = useState<{ from?: string; to?: string; game?: string }>({});
+
+    // fetch function
+    const fetchStats = async (filt: { from?: string; to?: string; game?: string }) => {
+        setLoading(true);
+        setError(null);
+        try {
+            // Try using axios helper; fallback to window.fetch
+            const params: Record<string, string> = {};
+            if (filt.from) params.from = filt.from;
+            if (filt.to) params.to = filt.to;
+            if (filt.game) params.game = filt.game;
+            
+            const query = new URLSearchParams(params).toString();
+            const url = `/api/stats${query ? `?${query}` : ''}`;
+            
+            const resp = await api.get(url);
+            const data = resp?.data ?? resp;
+            console.log('Fetching stats with params:', data);
+
+            // Expect data to be array of games with { game, date, won: number, total: number }
+            // Fallback: if data is not present, create mock aggregated output
+            let items: Array<{ game: string; date: string; won: number; total: number, left: number, lost: number }> = [];
+            if (Array.isArray(data)) items = data;
+            else if (data.items && Array.isArray(data.items)) items = data.items;
+            else {
+                // fallback mock
+                items = [
+                    { game: 'Game1', date: '2023-05-01', won: 2, total: 5, left: 1, lost: 2 },
+                    { game: 'Game2', date: '2023-05-02', won: 3, total: 5, left: 0, lost: 2 },
+                ];
+            }
+
+            // apply any client-side filters (dates)
+            const filtered = items.filter(it => {
+                // Normalize date safely
+                const itemDate = new Date(it.date);
+                const fromDate = filt.from ? new Date(filt.from) : null;
+                const toDate = filt.to ? new Date(filt.to) : null;
+                console.log('Filtering item date:', itemDate, 'from:', fromDate, 'to:', toDate);
+
+                // Filter by game
+                if (filt.game && filt.game !== 'All' && it.game !== filt.game) return false;
+
+                // Filter by date range
+                if (fromDate && itemDate < fromDate) return false;
+                if (toDate && itemDate > toDate) return false;
+
+                return true;
+            });
+
+
+            // Build bar data grouped by month (name) and game
+            const barMap = new Map<string, number>();
+            let total = 0;
+            let totalWon = 0;
+            let totalLost = 0;
+            let totalLeft = 0;
+
+            filtered.forEach(it => {
+                const d = new Date(it.date);
+                const name = d.toLocaleString(undefined, { month: 'short', year: 'numeric' });
+                const prev = barMap.get(name) ?? 0;
+                barMap.set(name, prev + it.total);
+                total += it.total;
+                totalWon += it.won;
+                totalLost += it.lost || 0;
+                totalLeft += it.left || 0;
+            });
+
+            const bars: BarData[] = Array.from(barMap.entries())
+                .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
+                .map(([name, value]) => ({ name, value, game: filt.game ?? 'All' }));
+
+            const pie: PieData[] = [
+                { name: 'Won', value: totalWon, status: 'Won' },
+                { name: 'Lost', value: totalLost, status: 'Lost' },
+                { name: 'Left', value: totalLeft, status: 'Left' },
+            ].filter(item => item.value > 0);
+
+            setBarData(bars);
+            setPieData(pie);
+            setTotalGames(total);
+        } catch (e: any) {
+            setError(e?.message ?? 'Failed to load statistics');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        console.log('Fetching stats with filters:', filters);
+        fetchStats(filters);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters]);
 
     // Custom formatter for tooltip
     const CustomTooltip = (props: TooltipProps<number, string>) => {
@@ -72,7 +167,14 @@ export default function StatisticsPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            <FilterPopup isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} buttonRef={filterButtonRef} />
+                            <FilterPopup
+                                isOpen={isFilterOpen}
+                                onClose={() => setIsFilterOpen(false)}
+                                buttonRef={filterButtonRef}
+                                onApply={(f) => {
+                                    setFilters({ from: f.from || undefined, to: f.to || undefined, game: f.game || undefined });
+                                }}
+                            />
                         </div>
                     </div>
                     {/* Bar Chart Section */}
@@ -92,14 +194,14 @@ export default function StatisticsPage() {
                     {/* Game Legend */}
                     <div className="mt-4 flex items-center justify-center gap-2">
                         <div className="w-4 h-4" style={{ backgroundColor: BAR_COLOR }} />
-                        <span>Game1</span>
+                        <span>{filters.game ?? 'All games'}</span>
                     </div>
                 </div>
 
                 {/* Pie Chart Section */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="mb-6 flex flex-col items-center justify-center">
-                        <h2 className="text-6xl font-bold text-[#0D1B2A]">5</h2>
+                        <h2 className="text-6xl font-bold text-[#0D1B2A]">{totalGames}</h2>
                         <p className="text-gray-600">Games</p>
                     </div>
 

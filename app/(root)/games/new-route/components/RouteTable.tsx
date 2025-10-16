@@ -4,7 +4,10 @@ import { useRouter } from 'next/navigation';
 import MediaPicker from '@/components/MediaPicker';
 import RouteActionsMenu from '@/app/(root)/games/new-route/components/RouteActionsMenu';
 import EndLocationPicker from '@/app/(root)/games/new-route/components/EndLocationPicker';
+import RiddleStructureEditor from '@/app/(root)/games/new-route/components/RiddleStructureEditor';
 import { useCallback } from 'react';
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import BackButton from './BackButton';
 import { FaGear } from 'react-icons/fa6';
 import { PiGearBold } from 'react-icons/pi';
@@ -210,6 +213,7 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
     // State for gear menu and modal
     const [gearMenuOpen, setGearMenuOpen] = useState(false);
     const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+    const [structureEditorOpen, setStructureEditorOpen] = useState(false);
     const gearMenuRef = React.useRef<HTMLDivElement>(null);
 
     // Close gear menu on outside click
@@ -460,7 +464,10 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                 <span className="text-xl">+</span>
                                 Add Riddle
                             </button>
-                            <button className="flex items-center w-full px-4 py-2 text-gray-900 hover:bg-gray-100 text-left text-sm gap-3">
+                            <button
+                                className="flex items-center w-full px-4 py-2 text-gray-900 hover:bg-gray-100 text-left text-sm gap-3"
+                                onClick={() => { setStructureEditorOpen(true); setGearMenuOpen(false); }}
+                            >
                                 <span className="text-lg">&#9776;</span>
                                 Edit structure
                             </button>
@@ -557,14 +564,16 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                                     console.error('Error adding riddle:', error);
                                                     // You might want to show an error message to the user here
                                                 }
-                                                {editLocationPickerOpen && (
-                                                    <EndLocationPicker
-                                                        open={editLocationPickerOpen}
-                                                        initialCoords={editCoordinates[0] && editCoordinates[1] ? [editCoordinates[0], editCoordinates[1]] : undefined}
-                                                        onClose={() => setEditLocationPickerOpen(false)}
-                                                        onSelect={(coords) => { setEditCoordinates(coords); setEditLocationPickerOpen(false); }}
-                                                    />
-                                                )}
+                                                {
+                                                    editLocationPickerOpen && (
+                                                        <EndLocationPicker
+                                                            open={editLocationPickerOpen}
+                                                            initialCoords={editCoordinates[0] && editCoordinates[1] ? [editCoordinates[0], editCoordinates[1]] : undefined}
+                                                            onClose={() => setEditLocationPickerOpen(false)}
+                                                            onSelect={(coords) => { setEditCoordinates(coords); setEditLocationPickerOpen(false); }}
+                                                        />
+                                                    )
+                                                }
                                             }}
                                         >Add Riddle</button>
                                     </div>
@@ -742,6 +751,27 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                 {/* Global Media Picker for the page - used by any 'Select from Media' button */}
                 <MediaPicker open={mediaPickerOpen} onClose={() => { setMediaPickerOpen(false); setMediaTarget(null); }} onSelect={handleMediaSelect} />
             </div>
+
+            {/* Structure Editor Modal */}
+            <DndProvider backend={HTML5Backend}>
+
+                <RiddleStructureEditor
+                    open={structureEditorOpen}
+                    onClose={() => setStructureEditorOpen(false)}
+                    riddles={riddles}
+                    onSave={(updatedRiddles) => {
+                        setRiddles(
+                            updatedRiddles.map((r, idx) => ({
+                                ...r,
+                                no: idx + 1,
+                                gameName: r.gameName ?? riddles[idx]?.gameName ?? "", // preserve or default
+                            }))
+                        );
+                    }}
+                    gameID={gameID}
+                />
+            </DndProvider>
+
             <div className='overflow-auto px-4 h-100'>
                 <table className="w-full mx-auto shadow-sm overflow-auto">
                     <thead className="bg-[#000f24] text-white">
@@ -918,6 +948,14 @@ const RouteTable: React.FC<RouteTableProps> = ({ gameID, routeID }) => {
                                                                 <button className="text-[#009FE3] text-sm font-medium text-left mb-1" onClick={() => setEndLocationPickerOpen(true)}>&#128205; Set coordinates on map</button>
                                                                 <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={editCoordinates[0]} onChange={e => setEditCoordinates([e.target.value, editCoordinates[1]])} />
                                                                 <input type="number" className="border px-3 py-1.5 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200 rounded" value={editCoordinates[1]} onChange={e => setEditCoordinates([editCoordinates[0], e.target.value])} />
+                                                                {endLocationPickerOpen && (
+                                                                    <EndLocationPicker
+                                                                        open={endLocationPickerOpen}
+                                                                        initialCoords={editCoordinates[0] && editCoordinates[1] ? [String(editCoordinates[0]), String(editCoordinates[1])] : undefined}
+                                                                        onClose={() => setEndLocationPickerOpen(false)}
+                                                                        onSelect={(coords) => { setEditCoordinates([coords[0], coords[1]]); setEndLocationPickerOpen(false); }}
+                                                                    />
+                                                                )}
                                                             </div>
                                                             <span className="text-black cursor-pointer group relative" title="Info">
                                                                 <svg width="18" height="18" className='bg-white' fill="currentColor" viewBox="0 0 24 24">

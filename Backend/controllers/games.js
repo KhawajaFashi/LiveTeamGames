@@ -637,3 +637,35 @@ export const duplicateRoute = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Error duplicating route', error: error.message });
     }
 }
+
+export const updateRiddleEpisodes = async (req, res) => {
+    try {
+        const { updates } = req.body;
+        // updates example:
+        // [
+        //   { _id: '68e97ca65c05aecf1bcacc81', episode: 4, gameName: 'game1' },
+        //   { _id: '68e9785a3351221fa3aa3154', episode: 3, gameName: 'game1' }
+        // ]
+        console.log("updates", updates);
+
+        if (!updates || !Array.isArray(updates) || updates.length === 0) {
+            return res.status(400).json({ message: "No updates provided" });
+        }
+
+        // Update riddles in parallel
+        const updatePromises = updates.map(async ({ _id, episode }) => {
+            // console.log(_id, episode);
+            await riddle.findByIdAndUpdate(_id, { $set: { episode } }, { new: true });
+        }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Episodes updated successfully",
+            updatedCount: updatePromises
+        });
+    } catch (error) {
+        console.error("Error updating episodes:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};

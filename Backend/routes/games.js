@@ -15,6 +15,7 @@ import {
     editRiddle,
     fetchRouteSettings,
     fetchGearSettings,
+    updateRiddleEpisodes,
 } from '../controllers/games.js';
 import {
     addRouteTemplate,
@@ -38,6 +39,7 @@ router.post('/update_route', updateRoute);
 router.post('/add_riddle', addRiddle);
 router.post('/add_template', addRouteTemplate);
 router.post('/edit_riddle_structure', editRiddleStructure);
+router.post('/update_riddle_episodes', updateRiddleEpisodes);
 router.post('/duplicate_route', duplicateRoute);
 router.delete('/delete_route', deleteRoute);
 router.delete('/delete_riddle', deleteRiddle);

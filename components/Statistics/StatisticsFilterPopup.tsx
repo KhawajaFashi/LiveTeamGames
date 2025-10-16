@@ -5,15 +5,15 @@ interface FilterPopupProps {
     isOpen: boolean;
     onClose: () => void;
     buttonRef: React.RefObject<HTMLDivElement | null>;
+    onApply?: (filters: { from: string; to: string; game: string }) => void;
 }
 
-const FilterPopup: React.FC<FilterPopupProps> = ({ isOpen, onClose, buttonRef }) => {
+const FilterPopup: React.FC<FilterPopupProps> = ({ isOpen, onClose, buttonRef, onApply }) => {
     const popupRef = useRef<HTMLDivElement>(null);
     const [filters, setFilters] = useState({
-        types: "Real Games",
         from: "",
         to: "",
-        games: "Game1",
+        game: "game1",
     });
 
     useEffect(() => {
@@ -46,21 +46,6 @@ const FilterPopup: React.FC<FilterPopupProps> = ({ isOpen, onClose, buttonRef })
         >
             {/* Filter Form */}
             <div className="space-y-3">
-                {/* Route */}
-                <div className="space-y-1">
-                    <label htmlFor="route" className="block text-[13px] font-medium text-gray-700">
-                        Types
-                    </label>
-                    <select
-                        id="route"
-                        className="w-full px-2 py-1 border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#00A3FF] text-[12px] text-gray-500"
-                        value={filters.types}
-                        onChange={(e) => setFilters({ ...filters, types: e.target.value })}
-                    >
-                        <option value="route1">Real Games</option>
-                        <option value="route2">Test Games</option>
-                    </select>
-                </div>
 
                 {/* Date */}
                 <div className="space-y-1">
@@ -98,20 +83,26 @@ const FilterPopup: React.FC<FilterPopupProps> = ({ isOpen, onClose, buttonRef })
                     <select
                         id="status"
                         className="w-full px-2 py-1 border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#00A3FF] text-[12px] text-gray-500"
-                        value={filters.games}
-                        onChange={(e) => setFilters({ ...filters, games: e.target.value })}
+                        value={filters.game}
+                        onChange={(e) => setFilters({ ...filters, game: e.target.value })}
                     >
+                        <option value="All">All</option>
                         <option value="game1">Game1</option>
                         <option value="game2">Game2</option>
                         <option value="game3">Game3</option>
                     </select>
+
                 </div>
             </div>
 
             {/* Action Buttons */}
             <div className="flex justify-end space-x-3 pt-4">
                 <button
-                    onClick={onClose}
+                    onClick={() => {
+                        // emit filters then close
+                        onApply?.({ from: filters.from, to: filters.to, game: filters.game });
+                        onClose();
+                    }}
                     className="px-3 py-1 text-sm font-medium text-white bg-[#00A3FF] rounded-md"
                 >
                     Filter
