@@ -137,6 +137,73 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
         // setLiveHighscores();
         // setLiveHighscores(highScoreData?.rows ?? []);
     }, [gameName]);
+
+    // Helper: convert teams array to CSV and trigger download
+    function downloadTeamsAsCSV(teams: Team[] | [], fileNamePrefix = 'teams') {
+        if (!teams || teams.length === 0) {
+            // nothing to download
+            return;
+        }
+
+        // Define the CSV columns we want
+        const columns = [
+            'name',
+            'routeName',
+            'score',
+            'status',
+            'phone',
+            'Battery',
+            'StartedAt',
+            'playingTime',
+            'timeLeft',
+            'createdAt',
+            'updatedAt',
+            'coordinates',
+            'riddlesCount',
+        ];
+
+        const escapeCell = (value: any) => {
+            if (value === null || value === undefined) return '';
+            if (typeof value === 'object') return JSON.stringify(value);
+            return String(value).replace(/"/g, '""');
+        };
+
+        const header = columns.join(',');
+        const rows = teams.map(team => {
+            const coords = team.coordinates ? `${team.coordinates.type} ${JSON.stringify(team.coordinates.coordinates)}` : '';
+            const started = team.StartedAt ? new Date(team.StartedAt).toISOString() : '';
+            const created = team.createdAt ? new Date(team.createdAt).toISOString() : '';
+            const updated = team.updatedAt ? new Date(team.updatedAt).toISOString() : '';
+            const rowVals = [
+                team.name || '',
+                team.routeName || '',
+                team.score ?? '',
+                team.status || '',
+                team.phone || '',
+                team.Battery ?? '',
+                started,
+                team.playingTime || '',
+                team.timeLeft || '',
+                created,
+                updated,
+                coords,
+                Array.isArray(team.riddles) ? team.riddles.length : '',
+            ];
+            return rowVals.map(v => `"${escapeCell(v)}"`).join(',');
+        });
+
+        const csvContent = [header, ...rows].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const safeName = (fileNamePrefix || 'teams').replace(/[^a-z0-9-_\.]/gi, '_');
+        a.download = `${safeName}_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    }
     {/* Live Highscore Section */ }
     return (
         <div>
@@ -213,7 +280,12 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
                                                 }
                                                 setMenuOpenIdx(null);
                                             }}
-                                            onDownloadTeamData={() => {/* TODO: Implement Download Team Data */ setMenuOpenIdx(null); }}
+                                            onDownloadTeamData={() => {
+                                                // generate CSV from teams shown in this highscore row
+                                                const teams = row?.teams || [];
+                                                downloadTeamsAsCSV(teams, `${row.name || 'teams'}`);
+                                                setMenuOpenIdx(null);
+                                            }}
                                             onReset={() => {
                                                 setResetIdx(idx);
                                                 setResetOpen(true);
@@ -438,7 +510,11 @@ const HighScore: React.FC<HighScoreProps> = ({ highScoreType }) => {
 
                                                     setSavedMenuOpenIdx(null);
                                                 }}
-                                                onDownloadTeamData={() => {/* TODO: Implement Download Team Data */ setSavedMenuOpenIdx(null); }}
+                                                onDownloadTeamData={() => {
+                                                    const teams = row?.teams || [];
+                                                    downloadTeamsAsCSV(teams, `${row.name || 'teams'}`);
+                                                    setSavedMenuOpenIdx(null);
+                                                }}
                                                 anchorRef={{ current: savedActionAnchorRefs.current[idx] as HTMLButtonElement }}
                                             />
                                             {/* Show modal for teams */}

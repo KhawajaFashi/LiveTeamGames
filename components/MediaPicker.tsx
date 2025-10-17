@@ -109,7 +109,7 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) =>
                         // leave optimistic preview
                         return;
                     }
-                    console.log("CloudName and UploadPreset: ",cloudName, uploadPreset);
+                    console.log("CloudName and UploadPreset: ", cloudName, uploadPreset);
 
                     const form = new FormData();
                     form.append('file', file);
@@ -125,7 +125,12 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) =>
 
                     console.log(secureUrl)
                     // Persist metadata to backend (store path as the cloud secure url)
-                    const saveRes = await api.post('/user/media', { folderName: currentFolder, name: file.name, path: secureUrl });
+                    const saveRes = await api.post('/user/media', {
+                        folderName: currentFolder,
+                        name: file.name,
+                        path: secureUrl,
+                        size: file.size  // Pass file size in bytes
+                    });
                     console.log(saveRes)
                     if (!saveRes.data.success) throw new Error('Failed to save media metadata');
 
@@ -153,7 +158,15 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) =>
             const mapped = serverMedia.map((f: any) => ({
                 type: 'folder',
                 name: f.folderName || f.name || 'home',
-                files: (f.images || []).map((img: any) => ({ type: 'image', name: img.name, src: img.path, lastModified: '', size: 0 })),
+                files: (f.images || []).map((img: any) => ({
+                    type: 'image',
+                    name: img.name,
+                    src: img.path,
+                    // try different possible field names returned by backend
+                    lastModified: img.modifiedTime || img.lastModified || img.updatedAt || img.createdAt || '',
+                    // size may be stored as bytes under size or sizeBytes
+                    size: typeof img.size === 'number' ? img.size : (typeof img.sizeBytes === 'number' ? img.sizeBytes : 0),
+                })),
             }));
             // Ensure at least home folder exists
             if (!mapped.find((m: any) => m.name === 'home')) mapped.unshift({ type: 'folder', name: 'home', files: [] });
@@ -194,6 +207,46 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) =>
     // Helper: clear selection
     function clearSelection(): void {
         setSelectedFiles([]);
+    }
+
+    // Delete selected files (calls backend)
+    async function deleteSelected() {
+        if (selectedFiles.length === 0) return;
+        try {
+            // Call backend delete for each selected file
+            for (const f of selectedFiles) {
+                await api.delete('/user/media', { data: { folderName: currentFolder, name: f.name } });
+            }
+            // Refresh media list
+            await fetchUserMedia();
+            clearSelection();
+            setShowDelete(false);
+            setDeleteConfirm('');
+        } catch (err) {
+            console.error('Error deleting media', err);
+            // still attempt to refresh
+            await fetchUserMedia();
+        }
+    }
+
+    // Download file (single or first selected)
+    async function downloadFile(file: FileType) {
+        try {
+            const url = file.src;
+            if (!url) return;
+            const resp = await fetch(url);
+            const blob = await resp.blob();
+            const a = document.createElement('a');
+            const objectUrl = URL.createObjectURL(blob);
+            a.href = objectUrl;
+            a.download = file.name || 'download';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(objectUrl);
+        } catch (err) {
+            console.error('Download failed', err);
+        }
     }
 
     // Move logic
@@ -270,7 +323,7 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) =>
                         <button className="bg-gray-100 px-3 py-1 rounded text-gray-700" onClick={() => setOpenFilter((prev) => !prev)}>
                             Filter <span className="ml-1">&#9662;</span>
                         </button>
-                        <div className="absolute left-0 mt-2 bg-white border rounded shadow-lg z-10">
+                        <div className="absolute left-0 mt-6 bg-white border rounded shadow-lg z-10">
                             {openFilter && filterOptions.map(opt => (
                                 <button key={opt} className={`block px-4 py-1 text-sm w-full text-left ${activeFilter === opt ? 'bg-gray-100' : ''}`} onClick={() => setActiveFilter(opt)}>{opt}</button>
                             ))}
@@ -278,7 +331,7 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) =>
                         <button className="bg-gray-100 px-3 py-1 rounded text-gray-700" onClick={() => setOpenSort((prev) => !prev)}>
                             Sort by <span className="ml-1">&#9662;</span>
                         </button>
-                        <div className="absolute left-0 mt-2 bg-white border rounded shadow-lg z-10">
+                        <div className="absolute left-0 mt-6 ml-24 bg-white border rounded shadow-lg z-10">
                             {openSort && sortOptions.map(opt => (
                                 <button key={opt} className={`block px-2 py-1 text-sm w-full text-left ${activeSort === opt ? 'bg-gray-100' : ''}`} onClick={() => setActiveSort(opt)}>{opt}</button>
                             ))}
@@ -329,9 +382,26 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) =>
                                 }}>
                                 <input type="checkbox" checked={isSelected} onChange={() => toggleFileSelection(m)} className="absolute top-2 left-2 w-4 h-4 accent-pink-500" />
                                 <Image src={m.src} alt={m.name} width={1000} height={1000} className="w-20 h-20 object-cover rounded" />
+                                {/* Per-file action buttons: Download (left) and Select (right) */}
+                                <div className="absolute bottom-2 left-2 flex gap-2">
+                                    <button
+                                        className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded disabled:opacity-50"
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            // If multiple files are selected globally, disable per-file download
+                                            if (selectedFiles.length > 1) return;
+                                            await downloadFile(m as FileType);
+                                        }}
+                                        disabled={selectedFiles.length > 1}
+                                        title={selectedFiles.length > 1 ? 'Disable download while multiple files are selected' : 'Download file'}
+                                    >
+                                        Download
+                                    </button>
+                                </div>
+
                                 {/* Select button for single-click selection */}
                                 <button
-                                    className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-[#009FE3] text-white text-xs px-2 py-1 rounded"
+                                    className="absolute bottom-2 right-2 bg-[#009FE3] text-white text-xs px-2 py-1 rounded"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         // set selected and call onSelect
@@ -361,12 +431,6 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) =>
                                     setBulkMenuOpen(false);
                                     // }
                                 }}>View Details</button>
-                                <button className="flex items-center gap-2 px-4 py-2 w-full hover:bg-gray-100 text-left" disabled={selectedFiles.length !== 1} onClick={() => {
-                                    if (selectedFiles.length === 1) {
-                                        window.open(selectedFiles[0].src, '_blank');
-                                        setBulkMenuOpen(false);
-                                    }
-                                }}>Download</button>
                                 <button className="flex items-center gap-2 px-4 py-2 w-full hover:bg-gray-100 text-left" disabled={selectedFiles.length === 0} onClick={() => {
                                     if (selectedFiles.length > 0) {
                                         setShowMove(true);
@@ -386,7 +450,7 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) =>
                 {/* View Details Modal */}
                 {showDetails && selectedFiles.length > 0 && (
                     <div className="fixed inset-0 z-60 flex items-center justify-center bg-[rgba(0,0,0,0.4)]">
-                        <div className="bg-white rounded-lg shadow-xl w-[500px] max-w-full p-6 relative">
+                        <div className="bg-white rounded-lg shadow-xl w-[45%] max-w-full p-6 relative">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-semibold">View Details</h3>
                                 <button className="text-gray-400 hover:text-gray-600 text-2xl" onClick={() => setShowDetails(false)}>&times;</button>
@@ -395,18 +459,18 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) =>
                                 <thead>
                                     <tr className="border-b">
                                         <th className="py-2">Image / Video</th>
-                                        <th>Name</th>
-                                        <th>Last Modified</th>
-                                        <th>File Size</th>
+                                        <th className='text-center'>Name</th>
+                                        <th className='text-center'>Last Modified</th>
+                                        <th className='text-center'>File Size</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {selectedFiles.map((file, idx) => (
                                         <tr key={file.name + idx}>
-                                            <td className="py-2"><Image src={file.src || ''} alt={file.name} width={40} height={40} className="rounded" /></td>
-                                            <td>{file.name}</td>
-                                            <td>{file.lastModified || '-'}</td>
-                                            <td>{file.size || '-'}</td>
+                                            <td className="py-2 text-center"><Image src={file.src || ''} alt={file.name} width={80} height={80} className="rounded" /></td>
+                                            <td className='text-center'>{file.name}</td>
+                                            <td className='text-center'>{file.lastModified?.split("T")[0] || '-'}</td>
+                                            <td className='text-center'>{file.size || '-'}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -455,7 +519,7 @@ const MediaPicker: React.FC<MediaPickerProps> = ({ open, onClose, onSelect }) =>
                                 <input type="text" className="border px-3 py-2 rounded w-full mb-2" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} />
                                 <div className="flex gap-2 mt-2">
                                     <button className="px-4 py-2 rounded bg-gray-100 text-gray-700 hover:bg-gray-200" onClick={() => { setShowDelete(false); setDeleteConfirm(''); }}>Cancel</button>
-                                    <button className="px-4 py-2 rounded bg-[#009FE3] text-white font-semibold hover:bg-[#007bb5]" disabled={deleteConfirm !== 'DELETE'} onClick={() => { setShowDelete(false); setDeleteConfirm(''); /* delete logic here */ }}>Confirm</button>
+                                    <button className="px-4 py-2 rounded bg-[#009FE3] text-white font-semibold hover:bg-[#007bb5]" disabled={deleteConfirm !== 'DELETE'} onClick={async () => { await deleteSelected(); }}>Confirm</button>
                                 </div>
                             </div>
                         </div>

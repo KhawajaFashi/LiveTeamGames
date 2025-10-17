@@ -104,6 +104,8 @@ const MyProfile: React.FC = () => {
                     setAddScore(res.data.user.addScore || false);
                     setAddTeamName(res.data.user.addTeamName || false);
                     setAddOverlayFrame(res.data.user.addOverlayFrame || false);
+                    setCompanyName(res.data.user.companyName || '');
+                    setPrivacyPolicy(res.data.user.privacyPolicy || '');
                 }
             } finally {
                 setLoading(false);
@@ -277,7 +279,7 @@ const MyProfile: React.FC = () => {
                             <label className="font-normal pt-2 text-left">Email Content<span className='text-red-600'>*</span></label>
                             <div className="flex flex-col gap-3">
                                 <input className="border px-3 py-1.5 w-full text-[13px] rounded focus:outline-none focus:ring-1 focus:ring-sky-400 border-gray-200" placeholder="Enter your email Subject" value={emailSubject} onChange={e => setEmailSubject(e.target.value)} />
-                                <div className="w-full mx-auto border bg-white shadow-sm h-60 bg-gray-50">
+                                <div className="w-full mx-auto border shadow-sm h-60 bg-gray-50">
                                     <div className="flex gap-2 border-b border-dashed border-gray-300 p-2 w-full bg-gray-50">
                                         <button
                                             type="button"

@@ -69,6 +69,8 @@ const userSchema = new Schema({
                 {
                     name: { type: String },
                     path: { type: String },
+                    size: { type: Number },
+                    modifiedTime: { type: Date },
                 },
             ],
         },
