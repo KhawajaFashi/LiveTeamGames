@@ -169,6 +169,8 @@ export async function sendMail(emailData) {
             },
         });
 
+        console.log("Prepared email content:");
+        
         // Mail options
         const mailOptions = {
             from: `${process.env.SMTP_USER}`,
@@ -176,8 +178,8 @@ export async function sendMail(emailData) {
             subject: emailSubject,
             text: emailContent, // fallback plain text
             html: htmlContent,
-            replyTo: replyEmail,
         };
+        console.log("Mail Options:",mailOptions);
 
         const info = await transporter.sendMail(mailOptions);
         console.log("Email sent:", info.messageId);
